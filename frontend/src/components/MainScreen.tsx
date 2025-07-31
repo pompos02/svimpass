@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp } from '../../wailsjs/go/main/App';
-import { PasswordEntry } from '../types';
+import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp, GenerateAndSavePassword } from '../../wailsjs/go/main/App';
+import { PasswordEntry, PasswordEntryState, AddGenCommand } from '../types';
 import { main } from '../../wailsjs/go/models';
-import { parseCommand, isValidNewCommand, formatNewCommandExample } from '../utils/commandParser';
+import { parseCommand, isValidNewCommand, isValidAddGenCommand, formatNewCommandExample, formatAddGenCommandExample } from '../utils/commandParser';
 import { useSimpleNavigation } from '../hooks/useSimpleNavigation';
 import PasswordDropdown from './PasswordDropdown';
 
@@ -18,6 +18,13 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [passwordEntryState, setPasswordEntryState] = useState<PasswordEntryState>({
+    isActive: false,
+    serviceName: '',
+    username: '',
+    notes: '',
+    showPassword: false
+  });
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleCopyPassword = async (id: number) => {
@@ -97,6 +104,38 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
 
 
   const handleSubmit = useCallback(async () => {
+    // Handle password entry mode submission
+    if (passwordEntryState.isActive) {
+      if (input.trim() === '') return;
+
+      try {
+        setIsLoading(true);
+        const request = new CreatePasswordRequest({
+          serviceName: passwordEntryState.serviceName,
+          username: passwordEntryState.username,
+          password: input,
+          notes: passwordEntryState.notes
+        });
+        
+        await CreatePassword(request);
+        setMessage(`Added password for ${passwordEntryState.serviceName}`);
+        setInput('');
+        setPasswordEntryState({
+          isActive: false,
+          serviceName: '',
+          username: '',
+          notes: '',
+          showPassword: false
+        });
+      } catch (error) {
+        setMessage('Failed to add password');
+        console.error('Add password failed:', error);
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     if (input.trim() === '') return;
 
     const command = parseCommand(input);
@@ -107,21 +146,42 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         return;
       }
 
+      // Enter password entry mode
+      setPasswordEntryState({
+        isActive: true,
+        serviceName: command.serviceName,
+        username: command.username,
+        notes: command.notes,
+        showPassword: false
+      });
+      setInput('');
+      setShowDropdown(false);
+      setResults([]);
+      navigation.reset();
+    } else if (command.type === 'addgen') {
+      if (!isValidAddGenCommand(command)) {
+        setMessage(`Invalid format. Use: ${formatAddGenCommandExample()}`);
+        return;
+      }
+
       try {
         setIsLoading(true);
         const request = new CreatePasswordRequest({
           serviceName: command.serviceName,
           username: command.username,
-          password: command.password,
+          password: '', // Will be generated
           notes: command.notes
         });
         
-        await CreatePassword(request);
-        setMessage(`Added password for ${command.serviceName}`);
+        const generatedPassword = await GenerateAndSavePassword(request);
+        
+        // Copy to clipboard
+        await navigator.clipboard.writeText(generatedPassword);
+        setMessage(`Generated and saved password for ${command.serviceName} (copied to clipboard)`);
         setInput('');
       } catch (error) {
-        setMessage('Failed to add password');
-        console.error('Add password failed:', error);
+        setMessage('Failed to generate and save password');
+        console.error('Generate and save failed:', error);
       } finally {
         setIsLoading(false);
       }
@@ -170,6 +230,13 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         setShowDropdown(false);
         setResults([]);
         setMessage('');
+        setPasswordEntryState({
+          isActive: false,
+          serviceName: '',
+          username: '',
+          notes: '',
+          showPassword: false
+        });
         navigation.reset();
         return;
       }
@@ -209,6 +276,14 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
           e.preventDefault();
           await handleLock();
         }
+        // Toggle password visibility in password entry mode
+        if (e.shiftKey && e.key === 'P' && passwordEntryState.isActive) {
+          e.preventDefault();
+          setPasswordEntryState(prev => ({
+            ...prev,
+            showPassword: !prev.showPassword
+          }));
+        }
       }
     };
 
@@ -217,10 +292,16 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
   }, [showDropdown, results, navigation, handleSubmit, handleDelete, handleLock]);
 
   const getPlaceholder = () => {
-    if (input.startsWith(':')) {
+    if (passwordEntryState.isActive) {
+      return `Enter password for ${passwordEntryState.serviceName}...`;
+    }
+    if (input.startsWith(':addgen')) {
+      return formatAddGenCommandExample();
+    }
+    if (input.startsWith(':new')) {
       return formatNewCommandExample();
     }
-    return 'Search passwords or type :new to add new entry...';
+    return 'Search passwords or type :new to add entry, :addgen to generate...';
   };
 
   return (
@@ -229,11 +310,9 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         <div className="input-wrapper">
           <input
             ref={inputRef}
-            type="text"
+            type={passwordEntryState.isActive && !passwordEntryState.showPassword ? "password" : "text"}
             value={input}
             onChange={handleInputChange}
-
-
             placeholder={getPlaceholder()}
             className="search-input"
             autoComplete="off"
@@ -242,6 +321,20 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
             spellCheck="false"
             disabled={isLoading}
           />
+          
+          {passwordEntryState.isActive && (
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setPasswordEntryState(prev => ({
+                ...prev,
+                showPassword: !prev.showPassword
+              }))}
+              title="Toggle password visibility (Ctrl+Shift+P)"
+            >
+              {passwordEntryState.showPassword ? '🙈' : '👁️'}
+            </button>
+          )}
           
           {isLoading && <div className="loading-indicator">⏳</div>}
         </div>
@@ -257,7 +350,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         {message && <div className="message">{message}</div>}
 
         <div className="help-text">
-          Enter to execute • :new to add • Ctrl+J/N ↓ Ctrl+K/P ↑ to navigate • Delete to remove • Ctrl+L to lock • Esc to clear
+          Enter to execute • :new to add manually • :addgen to generate • Ctrl+J/N ↓ Ctrl+K/P ↑ to navigate • Delete to remove • Ctrl+L to lock • Esc to clear
         </div>
       </div>
     </div>

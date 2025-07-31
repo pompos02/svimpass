@@ -7,6 +7,10 @@ export function CreatePassword(arg1:main.CreatePasswordRequest):Promise<void>;
 
 export function DeletePassword(arg1:number):Promise<void>;
 
+export function GenerateAndSavePassword(arg1:main.CreatePasswordRequest):Promise<string>;
+
+export function GeneratePassword():Promise<string>;
+
 export function GetPassword(arg1:number):Promise<string>;
 
 export function Greet(arg1:string):Promise<string>;

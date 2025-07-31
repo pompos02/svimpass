@@ -12,12 +12,27 @@ export interface AppState {
   isInitialized: boolean;
 }
 
+export interface AddGenCommand {
+  type: 'addgen';
+  serviceName: string;
+  username: string;
+  notes: string;
+
+}
+
+export interface PasswordEntryState {
+  isActive: boolean;
+  serviceName: string;
+  username: string;
+  notes: string;
+  showPassword: boolean;
+
+}
 // Command parsing types
 export interface NewCommand {
   type: 'new';
   serviceName: string;
   username: string;
-  password: string;
   notes: string;
 }
 
@@ -26,4 +41,4 @@ export interface SearchCommand {
   query: string;
 }
 
-export type Command = NewCommand | SearchCommand;
+export type Command = AddGenCommand | NewCommand | SearchCommand;

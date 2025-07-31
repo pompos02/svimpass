@@ -8,6 +8,7 @@ import (
 
 	"password-manager/internal/crypto"
 	"password-manager/internal/database"
+	"password-manager/internal/generator"
 )
 
 // App struct
@@ -155,6 +156,47 @@ func (a *App) SearchPasswords(query string) ([]PasswordEntryResponse, error) {
 	}
 
 	return response, nil
+}
+
+func (a *App) GeneratePassword() (string, error) {
+	return generator.GeneratePassword()
+}
+
+func (a *App) GenerateAndSavePassword(req CreatePasswordRequest) (string, error) {
+	if !a.IsUnlocked() {
+		return "", fmt.Errorf("you must be logged in")
+	}
+
+	if req.ServiceName == "" || req.Username == "" {
+		return "", fmt.Errorf("service name and username are required")
+	}
+
+	// Generating the password
+	password, err := generator.GeneratePassword()
+	if err != nil {
+		return "", fmt.Errorf("failed to generate password: %w", err)
+	}
+
+	req.Password = password
+
+	encryptedPassword, err := a.encKey.Encrypt(password)
+	if err != nil {
+		return "", fmt.Errorf("error encrypting the password")
+	}
+
+	entry := &database.PasswordEntry{
+		ServiceName:       req.ServiceName,
+		Username:          req.Username,
+		EncryptedPassword: encryptedPassword,
+		Notes:             req.Notes,
+	}
+
+	err = a.db.CreatePasswordEntry(entry)
+	if err != nil {
+		return "", err
+	}
+	// Returning the password for the clipboard
+	return password, nil
 }
 
 func (a *App) GetPassword(id int) (string, error) {
