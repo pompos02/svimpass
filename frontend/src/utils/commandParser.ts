@@ -1,4 +1,4 @@
-import { Command, NewCommand, SearchCommand, AddGenCommand } from '../types';
+import { Command, AddCommand, SearchCommand, AddGenCommand } from '../types';
 
 
 export function parseCommand(input: string): Command {
@@ -28,10 +28,10 @@ function parseColonCommand(input: string): Command {
     const args = content.slice(6).trim(); // Remove 'addgen '
     return parseAddGenCommand(args);
   }
-  if (command === 'new') {
-    // Get the arguments part (everything after 'new ')
+  if (command === 'add') {
+    // Get the arguments part (everything after 'add ')
     const args = content.slice(command.length).trim();
-    return parseNewCommand(args);
+    return parseAddCommand(args);
   }
 
   // If no recognized command, treat as search
@@ -41,17 +41,17 @@ function parseColonCommand(input: string): Command {
   } as SearchCommand;
 }
 
-function parseNewCommand(args: string): NewCommand {
+function parseAddCommand(args: string): AddCommand {
   // Split by semicolon
   const parts = args.split(';').map(part => part.trim());
 
-  // For :new command, we only need serviceName, username, notes (no password)
+  // For :add command, we only need serviceName, username, notes (no password)
   const serviceName = parts[0] || '';
   const username = parts[1] || '';
   const notes = parts[2] || '';
 
   return {
-    type: 'new',
+    type: 'add',
     serviceName,
     username,
     notes
@@ -75,7 +75,7 @@ function parseAddGenCommand(args: string): AddGenCommand {
   };
 }
 
-export function isValidNewCommand(command: NewCommand): boolean {
+export function isValidAddCommand(command: AddCommand): boolean {
   return command.serviceName.length > 0 && 
          command.username.length > 0;
 }
@@ -85,8 +85,8 @@ export function isValidAddGenCommand(command: AddGenCommand): boolean {
          command.username.length > 0;
 }
 
-export function formatNewCommandExample(): string {
-  return ':new service;username;notes';
+export function formatAddCommandExample(): string {
+  return ':add service;username;notes';
 }
 
 export function formatAddGenCommandExample(): string {

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp, GenerateAndSavePassword } from '../../wailsjs/go/main/App';
 import { PasswordEntry, PasswordEntryState, AddGenCommand } from '../types';
 import { main } from '../../wailsjs/go/models';
-import { parseCommand, isValidNewCommand, isValidAddGenCommand, formatNewCommandExample, formatAddGenCommandExample } from '../utils/commandParser';
+import { parseCommand, isValidAddCommand, isValidAddGenCommand, formatAddCommandExample, formatAddGenCommandExample } from '../utils/commandParser';
 import { useSimpleNavigation } from '../hooks/useSimpleNavigation';
 import PasswordDropdown from './PasswordDropdown';
 
@@ -118,7 +118,10 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         });
         
         await CreatePassword(request);
-        setMessage(`Added password for ${passwordEntryState.serviceName}`);
+        
+        // Copy password to clipboard
+        await navigator.clipboard.writeText(input);
+        setMessage(`Added password for ${passwordEntryState.serviceName} (copied to clipboard)`);
         setInput('');
         setPasswordEntryState({
           isActive: false,
@@ -140,9 +143,9 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
 
     const command = parseCommand(input);
 
-    if (command.type === 'new') {
-      if (!isValidNewCommand(command)) {
-        setMessage(`Invalid format. Use: ${formatNewCommandExample()}`);
+    if (command.type === 'add') {
+      if (!isValidAddCommand(command)) {
+        setMessage(`Invalid format. Use: ${formatAddCommandExample()}`);
         return;
       }
 
@@ -298,10 +301,10 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     if (input.startsWith(':addgen')) {
       return formatAddGenCommandExample();
     }
-    if (input.startsWith(':new')) {
-      return formatNewCommandExample();
+    if (input.startsWith(':add')) {
+      return formatAddCommandExample();
     }
-    return 'Search passwords or type :new to add entry, :addgen to generate...';
+    return 'Search passwords or type :add to add entry, :addgen to generate...';
   };
 
   return (
@@ -350,7 +353,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         {message && <div className="message">{message}</div>}
 
         <div className="help-text">
-          Enter to execute • :new to add manually • :addgen to generate • Ctrl+J/N ↓ Ctrl+K/P ↑ to navigate • Delete to remove • Ctrl+L to lock • Esc to clear
+          Enter to execute • :add to add manually • :addgen to generate • Ctrl+J/N ↓ Ctrl+K/P ↑ to navigate • Delete to remove • Ctrl+L to lock • Esc to clear
         </div>
       </div>
     </div>

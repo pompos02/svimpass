@@ -29,8 +29,8 @@ export interface PasswordEntryState {
 
 }
 // Command parsing types
-export interface NewCommand {
-  type: 'new';
+export interface AddCommand {
+  type: 'add';
   serviceName: string;
   username: string;
   notes: string;
@@ -41,4 +41,4 @@ export interface SearchCommand {
   query: string;
 }
 
-export type Command = AddGenCommand | NewCommand | SearchCommand;
+export type Command = AddGenCommand | AddCommand | SearchCommand;
