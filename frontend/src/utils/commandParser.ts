@@ -1,11 +1,11 @@
-import { Command, AddCommand, SearchCommand } from '../types';
+import { Command, NewCommand, SearchCommand } from '../types';
 
 export function parseCommand(input: string): Command {
   const trimmed = input.trim();
   
-  // Check if it's an add command (starts with +)
-  if (trimmed.startsWith('+')) {
-    return parseAddCommand(trimmed);
+  // Check if it's a command mode (starts with :)
+  if (trimmed.startsWith(':')) {
+    return parseColonCommand(trimmed);
   }
   
   // Otherwise it's a search command
@@ -15,12 +15,30 @@ export function parseCommand(input: string): Command {
   } as SearchCommand;
 }
 
-function parseAddCommand(input: string): AddCommand {
-  // Remove the + prefix
+function parseColonCommand(input: string): Command {
+  // Remove the : prefix
   const content = input.slice(1);
   
+  // Split by space to get command and arguments
+  const parts = content.split(' ');
+  const command = parts[0].toLowerCase();
+  
+  if (command === 'new') {
+    // Get the arguments part (everything after 'new ')
+    const args = content.slice(command.length).trim();
+    return parseNewCommand(args);
+  }
+  
+  // If no recognized command, treat as search
+  return {
+    type: 'search',
+    query: content
+  } as SearchCommand;
+}
+
+function parseNewCommand(args: string): NewCommand {
   // Split by semicolon
-  const parts = content.split(';').map(part => part.trim());
+  const parts = args.split(';').map(part => part.trim());
   
   // Ensure we have at least serviceName, username, and password
   const serviceName = parts[0] || '';
@@ -29,7 +47,7 @@ function parseAddCommand(input: string): AddCommand {
   const notes = parts[3] || '';
   
   return {
-    type: 'add',
+    type: 'new',
     serviceName,
     username,
     password,
@@ -37,12 +55,12 @@ function parseAddCommand(input: string): AddCommand {
   };
 }
 
-export function isValidAddCommand(command: AddCommand): boolean {
+export function isValidNewCommand(command: NewCommand): boolean {
   return command.serviceName.length > 0 && 
          command.username.length > 0 && 
          command.password.length > 0;
 }
 
-export function formatAddCommandExample(): string {
-  return '+service;username;password;notes';
+export function formatNewCommandExample(): string {
+  return ':new service;username;password;notes';
 }

@@ -13,8 +13,8 @@ export interface AppState {
 }
 
 // Command parsing types
-export interface AddCommand {
-  type: 'add';
+export interface NewCommand {
+  type: 'new';
   serviceName: string;
   username: string;
   password: string;
@@ -26,4 +26,4 @@ export interface SearchCommand {
   query: string;
 }
 
-export type Command = AddCommand | SearchCommand;
+export type Command = NewCommand | SearchCommand;

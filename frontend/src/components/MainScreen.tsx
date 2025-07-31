@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp } from '../../wailsjs/go/main/App';
 import { PasswordEntry } from '../types';
 import { main } from '../../wailsjs/go/models';
-import { parseCommand, isValidAddCommand, formatAddCommandExample } from '../utils/commandParser';
+import { parseCommand, isValidNewCommand, formatNewCommandExample } from '../utils/commandParser';
 import { useSimpleNavigation } from '../hooks/useSimpleNavigation';
 import PasswordDropdown from './PasswordDropdown';
 
@@ -87,7 +87,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         setIsLoading(false);
       }
     } else {
-      // Add command - hide dropdown and show format hint
+      // Command mode - hide dropdown and show format hint
       setShowDropdown(false);
       setResults([]);
       navigation.reset();
@@ -101,9 +101,9 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
 
     const command = parseCommand(input);
 
-    if (command.type === 'add') {
-      if (!isValidAddCommand(command)) {
-        setMessage(`Invalid format. Use: ${formatAddCommandExample()}`);
+    if (command.type === 'new') {
+      if (!isValidNewCommand(command)) {
+        setMessage(`Invalid format. Use: ${formatNewCommandExample()}`);
         return;
       }
 
@@ -217,10 +217,10 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
   }, [showDropdown, results, navigation, handleSubmit, handleDelete, handleLock]);
 
   const getPlaceholder = () => {
-    if (input.startsWith('+')) {
-      return formatAddCommandExample();
+    if (input.startsWith(':')) {
+      return formatNewCommandExample();
     }
-    return 'Search passwords or type + to add new entry...';
+    return 'Search passwords or type :new to add new entry...';
   };
 
   return (
@@ -257,7 +257,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         {message && <div className="message">{message}</div>}
 
         <div className="help-text">
-          Enter to execute • Ctrl+J/N ↓ Ctrl+K/P ↑ to navigate • Delete to remove • Ctrl+L to lock • Esc to clear
+          Enter to execute • :new to add • Ctrl+J/N ↓ Ctrl+K/P ↑ to navigate • Delete to remove • Ctrl+L to lock • Esc to clear
         </div>
       </div>
     </div>

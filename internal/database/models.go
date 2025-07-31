@@ -1,9 +1,9 @@
+// Package database handnles all the database
 package database
 
 import "time"
 
 // PasswordEntry represent a password entry
-
 type PasswordEntry struct {
 	ID                int       `db:"id"`
 	ServiceName       string    `db:"service_name"`
