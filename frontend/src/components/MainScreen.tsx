@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp, GenerateAndSavePassword } from '../../wailsjs/go/main/App';
-import { PasswordEntry, PasswordEntryState, AddGenCommand } from '../types';
+import { PasswordEntry, PasswordEntryState, AddGenCommand, InputMode } from '../types';
 import { main } from '../../wailsjs/go/models';
-import { parseCommand, isValidAddCommand, isValidAddGenCommand, formatAddCommandExample, formatAddGenCommandExample } from '../utils/commandParser';
+import { parseCommand, isValidAddCommand, isValidAddGenCommand, formatAddCommandExample, formatAddGenCommandExample, getCurrentMode, isSearchMode } from '../utils/commandParser';
 import { useSimpleNavigation } from '../hooks/useSimpleNavigation';
 import PasswordDropdown from './PasswordDropdown';
 
@@ -25,6 +25,24 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     notes: '',
     showPassword: false
   });
+
+  // Derived mode - no state needed, computed from current application state
+  const getCurrentMode = (): InputMode => {
+    // Priority 1: Password entry mode (highest priority)
+    if (passwordEntryState.isActive) {
+      return 'password'; // During password entry, search is disabled
+    }
+    
+    // Priority 2: Command mode (when input starts with :)
+    if (input.trim().startsWith(':')) {
+      return 'command';
+    }
+    
+    // Priority 3: Search mode (default)
+    return 'search';
+  };
+
+  const currentMode = getCurrentMode();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleCopyPassword = async (id: number) => {
@@ -69,6 +87,11 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     const value = e.target.value;
     setInput(value);
 
+    // If in password entry mode, don't perform any search operations
+    if (passwordEntryState.isActive) {
+      return;
+    }
+
     if (value.trim() === '') {
       setShowDropdown(false);
       setResults([]);
@@ -78,7 +101,8 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
 
     const command = parseCommand(value);
 
-    if (command.type === 'search') {
+    // Only perform search if in search mode (derived from current state)
+    if (command.type === 'search' && isSearchMode(value)) {
       try {
         setIsLoading(true);
         const searchResults = await SearchPasswords(command.query);
@@ -94,7 +118,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         setIsLoading(false);
       }
     } else {
-      // Command mode - hide dropdown and show format hint
+      // Command mode - hide dropdown and clear results immediately
       setShowDropdown(false);
       setResults([]);
       navigation.reset();
@@ -192,7 +216,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       // Copy password to clipboard - handled by navigation hook
       navigation.selectCurrent();
     }
-  }, [input, navigation]);
+  }, [input, navigation, passwordEntryState]);
 
   const handleDelete = useCallback(async (id: number) => {
     try {
@@ -307,17 +331,38 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     return 'Search passwords or type :add to add entry, :addgen to generate...';
   };
 
+  const getInputClassName = () => {
+    let className = 'search-input';
+    if (passwordEntryState.isActive) {
+      className += ' password-entry-mode';
+    } else if (currentMode === 'command') {
+      className += ' command-mode';
+    }
+    return className;
+  };
+
+  const getCurrentDisplayMode = () => {
+    if (passwordEntryState.isActive) {
+      return 'password';
+    }
+    return currentMode;
+  };
+
   return (
     <div className="main-screen">
       <div className="search-container">
         <div className="input-wrapper">
+          <div className={`mode-indicator ${getCurrentDisplayMode()}-mode`}>
+            {passwordEntryState.isActive ? 'PASS' : (currentMode === 'command' ? 'CMD' : 'SEARCH')}
+          </div>
+          
           <input
             ref={inputRef}
             type={passwordEntryState.isActive && !passwordEntryState.showPassword ? "password" : "text"}
             value={input}
             onChange={handleInputChange}
             placeholder={getPlaceholder()}
-            className="search-input"
+            className={getInputClassName()}
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"
@@ -353,7 +398,19 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         {message && <div className="message">{message}</div>}
 
         <div className="help-text">
-          Enter to execute • :add to add manually • :addgen to generate • Ctrl+J/N ↓ Ctrl+K/P ↑ to navigate • Delete to remove • Ctrl+L to lock • Esc to clear
+          {passwordEntryState.isActive ? (
+            <>
+              Enter to save password • Ctrl+Shift+P to toggle visibility • Esc to cancel
+              <br />
+              <span className="mode-help">Mode: Password Entry for {passwordEntryState.serviceName}</span>
+            </>
+          ) : (
+            <>
+              Enter to execute • :add to add manually • :addgen to generate • Ctrl+J/N ↓ Ctrl+K/P ↑ to navigate • Delete to remove • Ctrl+L to lock • Esc to clear
+              <br />
+              <span className="mode-help">Mode: {currentMode === 'command' ? 'Command (search disabled)' : 'Search (type : for commands)'}</span>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -1,5 +1,7 @@
 import { Command, AddCommand, SearchCommand, AddGenCommand } from '../types';
 
+export type InputMode = 'search' | 'command' | 'password';
+
 
 export function parseCommand(input: string): Command {
   const trimmed = input.trim();
@@ -91,4 +93,17 @@ export function formatAddCommandExample(): string {
 
 export function formatAddGenCommandExample(): string {
   return ':addgen service;username;notes';
+}
+
+export function getCurrentMode(input: string): InputMode {
+  const trimmed = input.trim();
+  return trimmed.startsWith(':') ? 'command' : 'search';
+}
+
+export function isCommandMode(input: string): boolean {
+  return getCurrentMode(input) === 'command';
+}
+
+export function isSearchMode(input: string): boolean {
+  return getCurrentMode(input) === 'search';
 }

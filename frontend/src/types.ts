@@ -42,3 +42,5 @@ export interface SearchCommand {
 }
 
 export type Command = AddGenCommand | AddCommand | SearchCommand;
+
+export type InputMode = 'search' | 'command' | 'password';

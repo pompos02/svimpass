@@ -114,6 +114,12 @@ body {
   margin-top: 1rem;
 }
 
+.mode-help {
+  color: #aaa;
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
 /* Main Screen Styles */
 .main-screen {
   display: flex;
@@ -135,6 +141,38 @@ body {
   position: relative;
   display: flex;
   align-items: center;
+}
+
+.mode-indicator {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  z-index: 1;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.mode-indicator.search-mode {
+  background: rgba(0, 122, 204, 0.2);
+  color: #007acc;
+  border: 1px solid rgba(0, 122, 204, 0.3);
+}
+
+.mode-indicator.command-mode {
+  background: rgba(255, 140, 0, 0.2);
+  color: #ff8c00;
+  border: 1px solid rgba(255, 140, 0, 0.3);
+}
+
+.mode-indicator.password-mode {
+  background: rgba(139, 92, 246, 0.2);
+  color: #8b5cf6;
+  border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
 .password-toggle {
@@ -160,7 +198,7 @@ body {
 
 .search-input {
   width: 100%;
-  padding: 1.2rem 1.5rem;
+  padding: 1.2rem 1.5rem 1.2rem 4.5rem;
   background: #2d2d2d;
   border: 2px solid #444;
   border-radius: 12px;
@@ -175,6 +213,28 @@ body {
   border-color: #007acc;
   background: #333;
   box-shadow: 0 0 0 3px rgba(0, 122, 204, 0.1);
+}
+
+.search-input.command-mode {
+  border-color: #ff8c00;
+  background: #2d2d2d;
+}
+
+.search-input.command-mode:focus {
+  border-color: #ff8c00;
+  background: #333;
+  box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
+}
+
+.search-input.password-entry-mode {
+  border-color: #8b5cf6;
+  background: #2d2d2d;
+}
+
+.search-input.password-entry-mode:focus {
+  border-color: #8b5cf6;
+  background: #333;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
 .search-input::placeholder {
