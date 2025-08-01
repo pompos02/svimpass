@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"password-manager/internal/crypto"
+	"password-manager/internal/csv"
 	"password-manager/internal/database"
 	"password-manager/internal/generator"
 )
@@ -123,6 +124,13 @@ func (a *App) LockApp() {
 // IsUnlocked returns true if the app is unlocked
 func (a *App) IsUnlocked() bool {
 	return a.isUnlocked
+}
+
+func (a *App) ImportPasswordFromCSV(filepath string) (int, error) {
+	if !a.isUnlocked {
+		return -1, fmt.Errorf("You must unlock the application")
+	}
+	return csv.ImportPasswordFromCSV(a.db, a.encKey, filepath)
 }
 
 func (a *App) SearchPasswords(query string) ([]PasswordEntryResponse, error) {

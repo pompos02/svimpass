@@ -25,3 +25,4 @@ func GeneratePassword() (string, error) {
 
 	return string(password), nil
 }
+
