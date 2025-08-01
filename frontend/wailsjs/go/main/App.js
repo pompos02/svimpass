@@ -26,6 +26,10 @@ export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }
 
+export function ImportPasswordFromCSV(arg1) {
+  return window['go']['main']['App']['ImportPasswordFromCSV'](arg1);
+}
+
 export function IsInitialized() {
   return window['go']['main']['App']['IsInitialized']();
 }

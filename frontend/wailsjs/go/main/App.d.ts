@@ -15,6 +15,8 @@ export function GetPassword(arg1:number):Promise<string>;
 
 export function Greet(arg1:string):Promise<string>;
 
+export function ImportPasswordFromCSV(arg1:string):Promise<number>;
+
 export function IsInitialized():Promise<boolean>;
 
 export function IsUnlocked():Promise<boolean>;

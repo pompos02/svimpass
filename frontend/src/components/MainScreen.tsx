@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp, GenerateAndSavePassword } from '../../wailsjs/go/main/App';
+import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp, GenerateAndSavePassword, ImportPasswordFromCSV } from '../../wailsjs/go/main/App';
 import { PasswordEntry, PasswordEntryState, AddGenCommand, InputMode } from '../types';
 import { main } from '../../wailsjs/go/models';
-import { parseCommand, isValidAddCommand, isValidAddGenCommand, formatAddCommandExample, formatAddGenCommandExample, getCurrentMode, isSearchMode } from '../utils/commandParser';
+import { parseCommand, isValidAddCommand, isValidAddGenCommand, isValidImportCommand, formatAddCommandExample, formatAddGenCommandExample, formatImportCommandExample, getCurrentMode, isSearchMode } from '../utils/commandParser';
 import { useSimpleNavigation } from '../hooks/useSimpleNavigation';
 import PasswordDropdown from './PasswordDropdown';
 
@@ -212,6 +212,23 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       } finally {
         setIsLoading(false);
       }
+    } else if (command.type === 'import') {
+      if (!isValidImportCommand(command)) {
+        setMessage(`Invalid format. Use: ${formatImportCommandExample()}`);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const importedCount = await ImportPasswordFromCSV(command.filename);
+        setMessage(`Successfully imported ${importedCount} passwords from ${command.filename}`);
+        setInput('');
+      } catch (error) {
+        setMessage(`Failed to import from ${command.filename}: ${error}`);
+        console.error('Import failed:', error);
+      } finally {
+        setIsLoading(false);
+      }
     } else if (command.type === 'search' && navigation.selectedItem) {
       // Copy password to clipboard - handled by navigation hook
       navigation.selectCurrent();
@@ -322,13 +339,16 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     if (passwordEntryState.isActive) {
       return `Enter password for ${passwordEntryState.serviceName}...`;
     }
+    if (input.startsWith(':import')) {
+      return formatImportCommandExample();
+    }
     if (input.startsWith(':addgen')) {
       return formatAddGenCommandExample();
     }
     if (input.startsWith(':add')) {
       return formatAddCommandExample();
     }
-    return 'Search passwords or type :add to add entry, :addgen to generate...';
+    return 'Search passwords or type :add to add entry, :addgen to generate, :import to import...';
   };
 
   const getInputClassName = () => {
@@ -406,7 +426,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
             </>
           ) : (
             <>
-              Enter to execute • :add to add manually • :addgen to generate • Ctrl+J/N ↓ Ctrl+K/P ↑ to navigate • Delete to remove • Ctrl+L to lock • Esc to clear
+              Enter to execute • :add to add manually • :addgen to generate • :import to import CSV • Ctrl+J/N ↓ Ctrl+K/P ↑ to navigate • Delete to remove • Ctrl+L to lock • Esc to clear
               <br />
               <span className="mode-help">Mode: {currentMode === 'command' ? 'Command (search disabled)' : 'Search (type : for commands)'}</span>
             </>

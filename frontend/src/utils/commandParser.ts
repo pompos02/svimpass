@@ -1,4 +1,4 @@
-import { Command, AddCommand, SearchCommand, AddGenCommand } from '../types';
+import { Command, AddCommand, SearchCommand, AddGenCommand, ImportCommand } from '../types';
 
 export type InputMode = 'search' | 'command' | 'password';
 
@@ -34,6 +34,10 @@ function parseColonCommand(input: string): Command {
     // Get the arguments part (everything after 'add ')
     const args = content.slice(command.length).trim();
     return parseAddCommand(args);
+  }
+  if (command === 'import') {
+    const args = content.slice(6).trim(); // Remove 'import '
+    return parseImportCommand(args);
   }
 
   // If no recognized command, treat as search
@@ -93,6 +97,22 @@ export function formatAddCommandExample(): string {
 
 export function formatAddGenCommandExample(): string {
   return ':addgen service;username;notes';
+}
+
+function parseImportCommand(args: string): ImportCommand {
+  return {
+    type: 'import',
+    filename: args.trim()
+  };
+}
+
+export function isValidImportCommand(command: ImportCommand): boolean {
+  return command.filename.length > 0 && 
+         (command.filename.startsWith('/') || !!command.filename.match(/^[A-Za-z]:\\/)); // Unix or Windows absolute paths
+}
+
+export function formatImportCommandExample(): string {
+  return ':import /absolute/path/to/passwords.csv';
 }
 
 export function getCurrentMode(input: string): InputMode {

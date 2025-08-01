@@ -41,6 +41,11 @@ export interface SearchCommand {
   query: string;
 }
 
-export type Command = AddGenCommand | AddCommand | SearchCommand;
+export interface ImportCommand {
+  type: 'import';
+  filename: string;
+}
+
+export type Command = AddGenCommand | AddCommand | SearchCommand | ImportCommand;
 
 export type InputMode = 'search' | 'command' | 'password';
