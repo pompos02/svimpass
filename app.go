@@ -10,6 +10,8 @@ import (
 	"password-manager/internal/csv"
 	"password-manager/internal/database"
 	"password-manager/internal/generator"
+
+	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
@@ -72,6 +74,12 @@ func (a *App) OnShutdown(ctx context.Context) {
 	if a.db != nil {
 		a.db.Close()
 	}
+}
+
+// onBeforeClose is called before the window closes
+func (a *App) onBeforeClose(ctx context.Context) bool {
+	// Return false to prevent window from closing (it will be hidden instead)
+	return false
 }
 
 func (a *App) IsInitialized() bool {
@@ -256,6 +264,78 @@ func (a *App) DeletePassword(id int) error {
 	}
 
 	return a.db.DeletePasswordEntry(id)
+}
+
+// Window management methods for Spotlight-like behavior
+func (a *App) ToggleWindow() {
+	if a.ctx == nil {
+		fmt.Println("Context is nil in ToggleWindow!")
+		return
+	}
+
+	fmt.Println("ToggleWindow called")
+
+	// For now, always show the window when hotkey is pressed
+	a.ShowSpotlight()
+}
+
+// ToggleWindowVisibility toggles the window visibility (used by global hotkey)
+func (a *App) ToggleWindowVisibility() {
+	a.ToggleWindow()
+}
+
+func (a *App) ShowSpotlight() {
+	if a.ctx == nil {
+		fmt.Println("Context is nil!")
+		return
+	}
+
+	fmt.Println("Showing Spotlight window...")
+
+	// Ensure window is not minimized first
+	wailsruntime.WindowUnminimise(a.ctx)
+
+	// Use default window size from main.go (1024x768)
+	wailsruntime.WindowSetSize(a.ctx, 1024, 768)
+
+	// Center the window on screen
+	wailsruntime.WindowCenter(a.ctx)
+
+	// Show and focus the window
+	wailsruntime.WindowShow(a.ctx)
+	wailsruntime.WindowSetAlwaysOnTop(a.ctx, true)
+
+	fmt.Println("Window should be visible now")
+}
+
+func (a *App) HideSpotlight() {
+	if a.ctx == nil {
+		return
+	}
+
+	// Hide the window
+	wailsruntime.WindowHide(a.ctx)
+}
+
+func (a *App) ExpandWindow(height int) {
+	if a.ctx == nil {
+		return
+	}
+
+	// Expand window height for results
+	wailsruntime.WindowSetSize(a.ctx, 600, height)
+}
+
+// TestToggle - method to test the toggle functionality from frontend
+func (a *App) TestToggle() {
+	fmt.Println("TestToggle called from frontend")
+	a.ToggleWindow()
+}
+
+// TestConnection - simple method to test frontend-backend communication
+func (a *App) TestConnection() string {
+	fmt.Println("TestConnection called from frontend")
+	return "Backend connection working!"
 }
 
 // Greet returns a greeting for the given name

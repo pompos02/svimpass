@@ -7,6 +7,8 @@ export function CreatePassword(arg1:main.CreatePasswordRequest):Promise<void>;
 
 export function DeletePassword(arg1:number):Promise<void>;
 
+export function ExpandWindow(arg1:number):Promise<void>;
+
 export function GenerateAndSavePassword(arg1:main.CreatePasswordRequest):Promise<string>;
 
 export function GeneratePassword():Promise<string>;
@@ -14,6 +16,8 @@ export function GeneratePassword():Promise<string>;
 export function GetPassword(arg1:number):Promise<string>;
 
 export function Greet(arg1:string):Promise<string>;
+
+export function HideSpotlight():Promise<void>;
 
 export function ImportPasswordFromCSV(arg1:string):Promise<number>;
 
@@ -28,5 +32,15 @@ export function OnShutdown(arg1:context.Context):Promise<void>;
 export function SearchPasswords(arg1:string):Promise<Array<main.PasswordEntryResponse>>;
 
 export function SetupMasterPassword(arg1:string,arg2:string):Promise<void>;
+
+export function ShowSpotlight():Promise<void>;
+
+export function TestConnection():Promise<string>;
+
+export function TestToggle():Promise<void>;
+
+export function ToggleWindow():Promise<void>;
+
+export function ToggleWindowVisibility():Promise<void>;
 
 export function UnlockApp(arg1:string):Promise<void>;

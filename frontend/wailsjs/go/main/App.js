@@ -10,6 +10,10 @@ export function DeletePassword(arg1) {
   return window['go']['main']['App']['DeletePassword'](arg1);
 }
 
+export function ExpandWindow(arg1) {
+  return window['go']['main']['App']['ExpandWindow'](arg1);
+}
+
 export function GenerateAndSavePassword(arg1) {
   return window['go']['main']['App']['GenerateAndSavePassword'](arg1);
 }
@@ -24,6 +28,10 @@ export function GetPassword(arg1) {
 
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
+}
+
+export function HideSpotlight() {
+  return window['go']['main']['App']['HideSpotlight']();
 }
 
 export function ImportPasswordFromCSV(arg1) {
@@ -52,6 +60,26 @@ export function SearchPasswords(arg1) {
 
 export function SetupMasterPassword(arg1, arg2) {
   return window['go']['main']['App']['SetupMasterPassword'](arg1, arg2);
+}
+
+export function ShowSpotlight() {
+  return window['go']['main']['App']['ShowSpotlight']();
+}
+
+export function TestConnection() {
+  return window['go']['main']['App']['TestConnection']();
+}
+
+export function TestToggle() {
+  return window['go']['main']['App']['TestToggle']();
+}
+
+export function ToggleWindow() {
+  return window['go']['main']['App']['ToggleWindow']();
+}
+
+export function ToggleWindowVisibility() {
+  return window['go']['main']['App']['ToggleWindowVisibility']();
 }
 
 export function UnlockApp(arg1) {
