@@ -21,6 +21,7 @@ type App struct {
 	masterMgr  *crypto.MasterPasswordManager
 	encKey     *crypto.EncryptionKey
 	isUnlocked bool
+	isWindowVisible bool  // Track window visibility state
 }
 
 type PasswordEntryResponse struct {
@@ -273,10 +274,14 @@ func (a *App) ToggleWindow() {
 		return
 	}
 
-	fmt.Println("ToggleWindow called")
-
-	// For now, always show the window when hotkey is pressed
-	a.ShowSpotlight()
+	fmt.Println("ToggleWindow called - current state:", a.isWindowVisible)
+	
+	// Toggle based on current window state
+	if a.isWindowVisible {
+		a.HideSpotlight()
+	} else {
+		a.ShowSpotlight()
+	}
 }
 
 // ToggleWindowVisibility toggles the window visibility (used by global hotkey)
@@ -301,9 +306,14 @@ func (a *App) ShowSpotlight() {
 	// Center the window on screen
 	wailsruntime.WindowCenter(a.ctx)
 
-	// Show and focus the window
+	// Show the window (this will bring it to front naturally)
 	wailsruntime.WindowShow(a.ctx)
-	wailsruntime.WindowSetAlwaysOnTop(a.ctx, true)
+
+	// Update state
+	a.isWindowVisible = true
+
+	// Emit event to frontend to focus the search input
+	wailsruntime.EventsEmit(a.ctx, "window-shown")
 
 	fmt.Println("Window should be visible now")
 }
@@ -313,8 +323,15 @@ func (a *App) HideSpotlight() {
 		return
 	}
 
+	fmt.Println("Hiding Spotlight window...")
+
 	// Hide the window
 	wailsruntime.WindowHide(a.ctx)
+
+	// Update state
+	a.isWindowVisible = false
+
+	fmt.Println("Window should be hidden now")
 }
 
 func (a *App) ExpandWindow(height int) {

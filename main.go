@@ -28,6 +28,7 @@ func main() {
 		Title:            "Password Manager",
 		Width:            1024,
 		Height:           768,
+		StartHidden:      true, // Start hidden for spotlight-like behavior
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
@@ -46,7 +47,8 @@ func main() {
 
 // setupGlobalHotkey sets up the Ctrl+P global hotkey
 func setupGlobalHotkey(app *App) {
-	hook.Register(hook.KeyDown, []string{"ctrl", "p"}, func(e hook.Event) {
+	// Register Ctrl+P combination - gohook handles the combination internally
+	hook.Register(hook.KeyDown, []string{"p", "ctrl"}, func(e hook.Event) {
 		if app.ctx != nil {
 			app.ToggleWindowVisibility()
 		}

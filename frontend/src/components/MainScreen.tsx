@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp, GenerateAndSavePassword, ImportPasswordFromCSV } from '../../wailsjs/go/main/App';
+import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp, GenerateAndSavePassword, ImportPasswordFromCSV, HideSpotlight } from '../../wailsjs/go/main/App';
 import { PasswordEntry, PasswordEntryState, AddGenCommand, InputMode } from '../types';
 import { main } from '../../wailsjs/go/models';
 import { parseCommand, isValidAddCommand, isValidAddGenCommand, isValidImportCommand, formatAddCommandExample, formatAddGenCommandExample, formatImportCommandExample, getCurrentMode, isSearchMode } from '../utils/commandParser';
 import { useSimpleNavigation } from '../hooks/useSimpleNavigation';
 import PasswordDropdown from './PasswordDropdown';
+import { EventsOn } from '../../wailsjs/runtime/runtime';
 
 const { CreatePasswordRequest } = main;
 
@@ -73,6 +74,15 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     if (inputRef.current) {
       inputRef.current.focus();
     }
+
+    // Listen for window-shown event from backend
+    const cleanup = EventsOn("window-shown", () => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    });
+
+    return cleanup;
   }, []);
 
   useEffect(() => {
@@ -270,6 +280,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
   useEffect(() => {
     const handleGlobalKeyDown = async (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        // Clear UI state
         setInput('');
         setShowDropdown(false);
         setResults([]);
@@ -282,6 +293,13 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
           showPassword: false
         });
         navigation.reset();
+        
+        // Hide the window
+        try {
+          await HideSpotlight();
+        } catch (error) {
+          console.error('Failed to hide window:', error);
+        }
         return;
       }
 
