@@ -16,12 +16,12 @@ import (
 
 // App struct
 type App struct {
-	ctx        context.Context
-	db         *database.DB
-	masterMgr  *crypto.MasterPasswordManager
-	encKey     *crypto.EncryptionKey
-	isUnlocked bool
-	isWindowVisible bool  // Track window visibility state
+	ctx             context.Context
+	db              *database.DB
+	masterMgr       *crypto.MasterPasswordManager
+	encKey          *crypto.EncryptionKey
+	isUnlocked      bool
+	isWindowVisible bool // Track window visibility state
 }
 
 type PasswordEntryResponse struct {
@@ -275,7 +275,7 @@ func (a *App) ToggleWindow() {
 	}
 
 	fmt.Println("ToggleWindow called - current state:", a.isWindowVisible)
-	
+
 	// Toggle based on current window state
 	if a.isWindowVisible {
 		a.HideSpotlight()
@@ -300,8 +300,8 @@ func (a *App) ShowSpotlight() {
 	// Ensure window is not minimized first
 	wailsruntime.WindowUnminimise(a.ctx)
 
-	// Use default window size from main.go (1024x768)
-	wailsruntime.WindowSetSize(a.ctx, 1024, 768)
+	// Set to collapsed state initially (search input only)
+	wailsruntime.WindowSetSize(a.ctx, 600, 50)
 
 	// Center the window on screen
 	wailsruntime.WindowCenter(a.ctx)
@@ -341,6 +341,36 @@ func (a *App) ExpandWindow(height int) {
 
 	// Expand window height for results
 	wailsruntime.WindowSetSize(a.ctx, 600, height)
+}
+
+// ResizeWindow resizes the window to the specified dimensions and centers it
+func (a *App) ResizeWindow(width, height int) {
+	if a.ctx == nil {
+		return
+	}
+
+	wailsruntime.WindowSetSize(a.ctx, width, height)
+	wailsruntime.WindowCenter(a.ctx)
+}
+
+// SetWindowCollapsed sets the window to collapsed state (search input only)
+func (a *App) SetWindowCollapsed() {
+	if a.ctx == nil {
+		return
+	}
+
+	wailsruntime.WindowSetSize(a.ctx, 600, 50)
+	wailsruntime.WindowCenter(a.ctx)
+}
+
+// SetWindowExpanded sets the window to expanded state (search input + dropdown)
+func (a *App) SetWindowExpanded() {
+	if a.ctx == nil {
+		return
+	}
+
+	wailsruntime.WindowSetSize(a.ctx, 600, 250)
+	wailsruntime.WindowCenter(a.ctx)
 }
 
 // TestToggle - method to test the toggle functionality from frontend

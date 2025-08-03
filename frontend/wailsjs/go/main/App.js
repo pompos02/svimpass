@@ -54,8 +54,20 @@ export function OnShutdown(arg1) {
   return window['go']['main']['App']['OnShutdown'](arg1);
 }
 
+export function ResizeWindow(arg1, arg2) {
+  return window['go']['main']['App']['ResizeWindow'](arg1, arg2);
+}
+
 export function SearchPasswords(arg1) {
   return window['go']['main']['App']['SearchPasswords'](arg1);
+}
+
+export function SetWindowCollapsed() {
+  return window['go']['main']['App']['SetWindowCollapsed']();
+}
+
+export function SetWindowExpanded() {
+  return window['go']['main']['App']['SetWindowExpanded']();
 }
 
 export function SetupMasterPassword(arg1, arg2) {

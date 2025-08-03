@@ -28,31 +28,42 @@ export default function PasswordDropdown({
     }
   };
 
-  return (
-    <div className="password-dropdown">
-      {results.map((entry, index) => (
-        <div
-          key={entry.id}
-          {...navigation.getItemProps(index)}
-        >
-          <div className="entry-main">
-            <div className="service-name">{entry.serviceName}</div>
-            <div className="username">{entry.username}</div>
-          </div>
-          
-          <div className="entry-details">
-            {entry.notes && <div className="notes">{entry.notes}</div>}
-            <div className="created-date">Added {formatDate(entry.createdAt)}</div>
-          </div>
+  // Limit to 4 visible items for Spotlight-like behavior
+  const MAX_VISIBLE_ITEMS = 4;
+  const hasMoreResults = results.length > MAX_VISIBLE_ITEMS;
 
-          <div className="entry-actions">
-            <span className="copy-hint">↵ Copy</span>
-            {index === navigation.selectedIndex && (
-              <span className="delete-hint">Del</span>
-            )}
+  return (
+    <div className="spotlight-dropdown">
+      <div className="dropdown-items" style={{ 
+        maxHeight: `${MAX_VISIBLE_ITEMS * 50}px`, // 50px per item
+        overflowY: hasMoreResults ? 'auto' : 'hidden'
+      }}>
+        {results.map((entry, index) => (
+          <div
+            key={entry.id}
+            className={`dropdown-item ${index === navigation.selectedIndex ? 'selected' : ''}`}
+            {...navigation.getItemProps(index)}
+          >
+            <div className="entry-main">
+              <div className="service-name">{entry.serviceName}</div>
+              <div className="username">{entry.username}</div>
+            </div>
+            
+            <div className="entry-actions">
+              <span className="copy-hint">↵</span>
+              {index === navigation.selectedIndex && (
+                <span className="delete-hint">⌫</span>
+              )}
+            </div>
           </div>
+        ))}
+      </div>
+      
+      {hasMoreResults && (
+        <div className="more-results-indicator">
+          {results.length - MAX_VISIBLE_ITEMS} more results...
         </div>
-      ))}
+      )}
       
       {results.length === 0 && (
         <div className="dropdown-item no-results">

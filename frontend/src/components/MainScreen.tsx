@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp, GenerateAndSavePassword, ImportPasswordFromCSV, HideSpotlight } from '../../wailsjs/go/main/App';
+import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp, GenerateAndSavePassword, ImportPasswordFromCSV, HideSpotlight, SetWindowCollapsed, SetWindowExpanded } from '../../wailsjs/go/main/App';
 import { PasswordEntry, PasswordEntryState, AddGenCommand, InputMode } from '../types';
 import { main } from '../../wailsjs/go/models';
 import { parseCommand, isValidAddCommand, isValidAddGenCommand, isValidImportCommand, formatAddCommandExample, formatAddGenCommandExample, formatImportCommandExample, getCurrentMode, isSearchMode } from '../utils/commandParser';
@@ -106,6 +106,12 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       setShowDropdown(false);
       setResults([]);
       navigation.reset();
+      // Collapse window when no input
+      try {
+        await SetWindowCollapsed();
+      } catch (error) {
+        console.error('Failed to collapse window:', error);
+      }
       return;
     }
 
@@ -117,13 +123,32 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         setIsLoading(true);
         const searchResults = await SearchPasswords(command.query);
         setResults(searchResults || []);
-        setShowDropdown(searchResults.length > 0);
+        const hasResults = searchResults && searchResults.length > 0;
+        setShowDropdown(hasResults);
+        
+        // Resize window based on results
+        try {
+          if (hasResults) {
+            await SetWindowExpanded();
+          } else {
+            await SetWindowCollapsed();
+          }
+        } catch (error) {
+          console.error('Failed to resize window:', error);
+        }
+        
         // Don't reset navigation here - let user continue with existing selection
       } catch (error) {
         console.error('Search failed:', error);
         setResults([]);
         setShowDropdown(false);
         navigation.reset();
+        // Collapse window on error
+        try {
+          await SetWindowCollapsed();
+        } catch (resizeError) {
+          console.error('Failed to collapse window:', resizeError);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -132,6 +157,12 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       setShowDropdown(false);
       setResults([]);
       navigation.reset();
+      // Collapse window in command mode
+      try {
+        await SetWindowCollapsed();
+      } catch (error) {
+        console.error('Failed to collapse window:', error);
+      }
     }
   };
 
@@ -387,43 +418,21 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
   };
 
   return (
-    <div className="main-screen">
+    <div className="spotlight-window">
       <div className="search-container">
-        <div className="input-wrapper">
-          <div className={`mode-indicator ${getCurrentDisplayMode()}-mode`}>
-            {passwordEntryState.isActive ? 'PASS' : (currentMode === 'command' ? 'CMD' : 'SEARCH')}
-          </div>
-          
-          <input
-            ref={inputRef}
-            type={passwordEntryState.isActive && !passwordEntryState.showPassword ? "password" : "text"}
-            value={input}
-            onChange={handleInputChange}
-            placeholder={getPlaceholder()}
-            className={getInputClassName()}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck="false"
-            disabled={isLoading}
-          />
-          
-          {passwordEntryState.isActive && (
-            <button
-              type="button"
-              className="password-toggle"
-              onClick={() => setPasswordEntryState(prev => ({
-                ...prev,
-                showPassword: !prev.showPassword
-              }))}
-              title="Toggle password visibility (Ctrl+Shift+P)"
-            >
-              {passwordEntryState.showPassword ? '🙈' : '👁️'}
-            </button>
-          )}
-          
-          {isLoading && <div className="loading-indicator">⏳</div>}
-        </div>
+        <input
+          ref={inputRef}
+          type={passwordEntryState.isActive && !passwordEntryState.showPassword ? "password" : "text"}
+          value={input}
+          onChange={handleInputChange}
+          placeholder={getPlaceholder()}
+          className="spotlight-input"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck="false"
+          disabled={isLoading}
+        />
 
         {showDropdown && results.length > 0 && (
           <PasswordDropdown
@@ -433,23 +442,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
           />
         )}
 
-        {message && <div className="message">{message}</div>}
-
-        <div className="help-text">
-          {passwordEntryState.isActive ? (
-            <>
-              Enter to save password • Ctrl+Shift+P to toggle visibility • Esc to cancel
-              <br />
-              <span className="mode-help">Mode: Password Entry for {passwordEntryState.serviceName}</span>
-            </>
-          ) : (
-            <>
-              Enter to execute • :add to add manually • :addgen to generate • :import to import CSV • Ctrl+J/N ↓ Ctrl+K/P ↑ to navigate • Delete to remove • Ctrl+L to lock • Esc to clear
-              <br />
-              <span className="mode-help">Mode: {currentMode === 'command' ? 'Command (search disabled)' : 'Search (type : for commands)'}</span>
-            </>
-          )}
-        </div>
+        {message && <div className="spotlight-message">{message}</div>}
       </div>
     </div>
   );

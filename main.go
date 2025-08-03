@@ -25,16 +25,23 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:            "Password Manager",
-		Width:            1024,
-		Height:           768,
-		StartHidden:      true, // Start hidden for spotlight-like behavior
+		Title:         "Password Manager",
+		Width:         600, // Spotlight-like width
+		Height:        50,  // Collapsed height (search input only)
+		MinWidth:      400,
+		MinHeight:     50,
+		MaxWidth:      800,
+		MaxHeight:     300,  // Allow expansion for dropdown
+		Frameless:     true, // Remove window borders/title bar
+		StartHidden:   true, // Start hidden for spotlight-like behavior
+		AlwaysOnTop:   true, // Stay on top like Spotlight
+		DisableResize: true, // Prevent manual resize
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
-		OnStartup:        app.startup,
-		OnBeforeClose:    app.onBeforeClose,
+		BackgroundColour:  &options.RGBA{R: 255, G: 255, B: 255, A: 1}, // White background
+		OnStartup:         app.startup,
+		OnBeforeClose:     app.onBeforeClose,
 		HideWindowOnClose: true, // Hide instead of quit when window is closed
 		Bind: []interface{}{
 			app,
