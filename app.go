@@ -301,6 +301,7 @@ func (a *App) ShowSpotlight() {
 	wailsruntime.WindowUnminimise(a.ctx)
 
 	// Set to collapsed state initially (search input only)
+	// Use same size for both login and main interface
 	wailsruntime.WindowSetSize(a.ctx, 600, 50)
 
 	// Center the window on screen

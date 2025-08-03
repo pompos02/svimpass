@@ -418,10 +418,36 @@ body {
 
 .spotlight-input::placeholder {
   color: #999;
+  transition: color 0.3s ease;
 }
 
 .spotlight-input:focus {
   background: white;
+}
+
+/* Error/feedback placeholder styling */
+.spotlight-input::placeholder {
+  color: #999;
+}
+
+.spotlight-input[placeholder*="Wrong"],
+.spotlight-input[placeholder*="Failed"],
+.spotlight-input[placeholder*="cannot"],
+.spotlight-input[placeholder*="do not match"] {
+  animation: shake 0.5s ease-in-out;
+}
+
+.spotlight-input[placeholder*="Wrong"]::placeholder,
+.spotlight-input[placeholder*="Failed"]::placeholder,
+.spotlight-input[placeholder*="cannot"]::placeholder,
+.spotlight-input[placeholder*="do not match"]::placeholder {
+  color: #ff3b30;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
 }
 
 /* Spotlight Dropdown */
