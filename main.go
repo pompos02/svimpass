@@ -54,7 +54,7 @@ func main() {
 
 // setupGlobalHotkey sets up the Ctrl+P global hotkey
 func setupGlobalHotkey(app *App) {
-	// Register Ctrl+P combination - gohook handles the combination internally
+	// Register Ctrl+P combination using proper gohook syntax
 	hook.Register(hook.KeyDown, []string{"p", "ctrl"}, func(e hook.Event) {
 		if app.ctx != nil {
 			app.ToggleWindowVisibility()

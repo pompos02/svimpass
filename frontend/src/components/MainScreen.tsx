@@ -27,18 +27,19 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     showPassword: false
   });
 
+
   // Derived mode - no state needed, computed from current application state
   const getCurrentMode = (): InputMode => {
     // Priority 1: Password entry mode (highest priority)
     if (passwordEntryState.isActive) {
       return 'password'; // During password entry, search is disabled
     }
-    
+
     // Priority 2: Command mode (when input starts with :)
     if (input.trim().startsWith(':')) {
       return 'command';
     }
-    
+
     // Priority 3: Search mode (default)
     return 'search';
   };
@@ -50,12 +51,19 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     try {
       const password = await GetPassword(id);
       await navigator.clipboard.writeText(password);
-      
-      const entry = results.find(r => r.id === id);
-      setMessage(`Copied password for ${entry?.serviceName || 'entry'}`);
+
+      // Clear UI state
       setInput('');
       setShowDropdown(false);
       navigation.reset();
+
+      // Instantly hide window after copying password (true Spotlight behavior)
+      try {
+        await HideSpotlight();
+      } catch (error) {
+        console.error('Failed to hide window after copy:', error);
+      }
+
     } catch (error) {
       setMessage('Failed to copy password');
       console.error('Copy password failed:', error);
@@ -125,7 +133,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         setResults(searchResults || []);
         const hasResults = searchResults && searchResults.length > 0;
         setShowDropdown(hasResults);
-        
+
         // Resize window based on results
         try {
           if (hasResults) {
@@ -136,7 +144,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         } catch (error) {
           console.error('Failed to resize window:', error);
         }
-        
+
         // Don't reset navigation here - let user continue with existing selection
       } catch (error) {
         console.error('Search failed:', error);
@@ -181,12 +189,13 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
           password: input,
           notes: passwordEntryState.notes
         });
-        
+
         await CreatePassword(request);
-        
+
         // Copy password to clipboard
         await navigator.clipboard.writeText(input);
-        setMessage(`Added password for ${passwordEntryState.serviceName} (copied to clipboard)`);
+
+        // Clear UI state
         setInput('');
         setPasswordEntryState({
           isActive: false,
@@ -195,6 +204,13 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
           notes: '',
           showPassword: false
         });
+
+        // Instantly hide window after copying password
+        try {
+          await HideSpotlight();
+        } catch (error) {
+          console.error('Failed to hide window after password creation:', error);
+        }
       } catch (error) {
         setMessage('Failed to add password');
         console.error('Add password failed:', error);
@@ -240,13 +256,21 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
           password: '', // Will be generated
           notes: command.notes
         });
-        
+
         const generatedPassword = await GenerateAndSavePassword(request);
-        
+
         // Copy to clipboard
         await navigator.clipboard.writeText(generatedPassword);
-        setMessage(`Generated and saved password for ${command.serviceName} (copied to clipboard)`);
+
+        // Clear UI state
         setInput('');
+
+        // Instantly hide window after copying generated password
+        try {
+          await HideSpotlight();
+        } catch (error) {
+          console.error('Failed to hide window after password generation:', error);
+        }
       } catch (error) {
         setMessage('Failed to generate and save password');
         console.error('Generate and save failed:', error);
@@ -281,7 +305,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       const entry = results.find(r => r.id === id);
       await DeletePassword(id);
       setMessage(`Deleted ${entry?.serviceName || 'entry'}`);
-      
+
       // Refresh results
       if (input.trim()) {
         const command = parseCommand(input);
@@ -324,7 +348,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
           showPassword: false
         });
         navigation.reset();
-        
+
         // Hide the window
         try {
           await HideSpotlight();
@@ -344,18 +368,18 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         return;
       }
 
-      // Handle dropdown navigation with Ctrl shortcuts
+      // Handle dropdown navigation with arrow keys
       if (showDropdown && results.length > 0) {
-        // Down navigation: Ctrl+J or Ctrl+N
-        if ((e.ctrlKey || e.metaKey) && (e.key === 'j' || e.key === 'n')) {
+        // Down navigation: Arrow Down
+        if (e.key === 'ArrowDown') {
           e.preventDefault();
           navigation.selectNext();
-        } 
-        // Up navigation: Ctrl+K or Ctrl+P
-        else if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'p')) {
+        }
+        // Up navigation: Arrow Up
+        else if (e.key === 'ArrowUp') {
           e.preventDefault();
           navigation.selectPrevious();
-        } 
+        }
         // Delete selected item
         else if (e.key === 'Delete' && navigation.selectedItem) {
           e.preventDefault();
@@ -364,19 +388,18 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       }
 
       // Global shortcuts
-      if (e.ctrlKey || e.metaKey) {
-        if (e.key === 'l') {
-          e.preventDefault();
-          await handleLock();
-        }
-        // Toggle password visibility in password entry mode
-        if (e.shiftKey && e.key === 'P' && passwordEntryState.isActive) {
-          e.preventDefault();
-          setPasswordEntryState(prev => ({
-            ...prev,
-            showPassword: !prev.showPassword
-          }));
-        }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+        e.preventDefault();
+        await handleLock();
+      }
+
+      // Toggle password visibility in password entry mode
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'P' && passwordEntryState.isActive) {
+        e.preventDefault();
+        setPasswordEntryState(prev => ({
+          ...prev,
+          showPassword: !prev.showPassword
+        }));
       }
     };
 
@@ -416,6 +439,8 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     }
     return currentMode;
   };
+
+
 
   return (
     <div className="spotlight-window">
