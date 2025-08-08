@@ -4,7 +4,6 @@ import (
 	"context"
 	"embed"
 
-	"github.com/robotn/gohook"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -20,8 +19,7 @@ func main() {
 	// Create an instance of the app structure
 	app := NewApp()
 
-	// Set up global hotkey in a separate goroutine
-	go setupGlobalHotkey(app)
+	// Global hotkey is now initialized in app.startup()
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -41,6 +39,7 @@ func main() {
 		},
 		BackgroundColour:  &options.RGBA{R: 255, G: 255, B: 255, A: 1}, // White background
 		OnStartup:         app.startup,
+		OnShutdown:        app.OnShutdown,
 		OnBeforeClose:     app.onBeforeClose,
 		HideWindowOnClose: true, // Hide instead of quit when window is closed
 		Bind: []interface{}{
@@ -52,15 +51,5 @@ func main() {
 	}
 }
 
-// setupGlobalHotkey sets up the Ctrl+P global hotkey
-func setupGlobalHotkey(app *App) {
-	// Register Ctrl+P combination using proper gohook syntax
-	hook.Register(hook.KeyDown, []string{"p", "ctrl"}, func(e hook.Event) {
-		if app.ctx != nil {
-			app.ToggleWindowVisibility()
-		}
-	})
-
-	s := hook.Start()
-	<-hook.Process(s)
-}
+// Global hotkey functionality is now implemented directly in app.go
+// using the golang.design/x/hotkey library for better cross-platform support

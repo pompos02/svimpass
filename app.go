@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -12,6 +13,8 @@ import (
 	"password-manager/internal/generator"
 
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"golang.design/x/hotkey"
+	"golang.design/x/hotkey/mainthread"
 )
 
 // App struct
@@ -69,9 +72,48 @@ func (a *App) startup(ctx context.Context) {
 		fmt.Printf("Error initializing thr db : %v", err)
 	}
 	a.db = db
+	
+	// Register hotkey using mainthread - CRITICAL for hotkey to work
+	// Must be called in startup after Wails context is available
+	mainthread.Init(a.registerHotkey)
+}
+
+// registerHotkey implements the correct blocking pattern for golang.design/x/hotkey
+// This is called by mainthread.Init() and handles the hotkey lifecycle
+func (a *App) registerHotkey() {
+	// Create the hotkey (Alt+P) - using Mod1 which is Alt on most Linux systems
+	hk := hotkey.New([]hotkey.Modifier{hotkey.Mod1}, hotkey.KeyP)
+	
+	// Try to register the hotkey
+	err := hk.Register()
+	if err != nil {
+		log.Printf("Failed to register global hotkey Alt+P: %v", err)
+		log.Printf("Application will continue without global hotkey functionality")
+		return
+	}
+	
+	log.Printf("Global hotkey Alt+P registered successfully")
+	
+	// Block and wait for hotkey press (this is the correct pattern!)
+	<-hk.Keydown()
+	
+	// Hotkey was pressed - handle the event
+	log.Printf("Hotkey Alt+P pressed!")
+	if a.ctx != nil {
+		a.ToggleWindowVisibility()
+	}
+	
+	// Unregister this instance (hotkeys are single-use)
+	hk.Unregister()
+	log.Printf("Hotkey unregistered after use")
+	
+	// Recursively re-register for the next hotkey press
+	// This is essential - each hotkey event "consumes" the registration
+	a.registerHotkey()
 }
 
 func (a *App) OnShutdown(ctx context.Context) {
+	// Close database - hotkey cleanup happens automatically
 	if a.db != nil {
 		a.db.Close()
 	}
