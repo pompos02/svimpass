@@ -3,6 +3,11 @@ package main
 import (
 	"context"
 	"embed"
+	"fmt"
+	"net"
+	"os"
+
+	"password-manager/internal/paths"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -16,13 +21,31 @@ var assets embed.FS
 var wailsCtx context.Context
 
 func main() {
+	// Initialize application paths
+	appPaths, err := paths.New()
+	if err != nil {
+		fmt.Printf("Failed to initialize application directories: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Check for --toggle flag
+	if len(os.Args) > 1 && os.Args[1] == "--toggle" {
+		if err := sendToggleCommand(appPaths); err != nil {
+			fmt.Printf("Failed to toggle: %v\n", err)
+			os.Exit(1)
+		}
+		return
+	}
+
 	// Create an instance of the app structure
 	app := NewApp()
+	app.paths = appPaths
 
-	// Global hotkey is now initialized in app.startup()
+	// Start socket listener for toggle commands
+	go startSocketListener(app, appPaths)
 
 	// Create application with options
-	err := wails.Run(&options.App{
+	err = wails.Run(&options.App{
 		Title:         "Password Manager",
 		Width:         600, // Spotlight-like width
 		Height:        50,  // Collapsed height (search input only)
@@ -39,7 +62,13 @@ func main() {
 		},
 		BackgroundColour:  &options.RGBA{R: 255, G: 255, B: 255, A: 1}, // White background
 		OnStartup:         app.startup,
-		OnShutdown:        app.OnShutdown,
+		OnShutdown: func(ctx context.Context) {
+			app.OnShutdown(ctx)
+			// Cleanup runtime files
+			if err := appPaths.Cleanup(); err != nil {
+				fmt.Printf("Warning: Failed to cleanup runtime files: %v\n", err)
+			}
+		},
 		OnBeforeClose:     app.onBeforeClose,
 		HideWindowOnClose: true, // Hide instead of quit when window is closed
 		Bind: []interface{}{
@@ -51,5 +80,56 @@ func main() {
 	}
 }
 
-// Global hotkey functionality is now implemented directly in app.go
-// using the golang.design/x/hotkey library for better cross-platform support
+// Send toggle command to running instance
+func sendToggleCommand(appPaths *paths.Paths) error {
+	socketPath := appPaths.Socket()
+	conn, err := net.Dial("unix", socketPath)
+	if err != nil {
+		return fmt.Errorf("application not running or socket unavailable")
+	}
+	defer conn.Close()
+	
+	_, err = conn.Write([]byte("toggle"))
+	return err
+}
+
+// Start socket listener for toggle commands
+func startSocketListener(app *App, appPaths *paths.Paths) {
+	socketPath := appPaths.Socket()
+	
+	// Remove existing socket file
+	os.Remove(socketPath)
+	
+	listener, err := net.Listen("unix", socketPath)
+	if err != nil {
+		fmt.Printf("Failed to create socket listener: %v\n", err)
+		return
+	}
+	defer listener.Close()
+	defer os.Remove(socketPath)
+	
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			continue
+		}
+		
+		go func(c net.Conn) {
+			defer c.Close()
+			
+			buf := make([]byte, 1024)
+			n, err := c.Read(buf)
+			if err != nil {
+				return
+			}
+			
+			command := string(buf[:n])
+			if command == "toggle" {
+				// Call toggle function on main thread
+				if app.ctx != nil {
+					app.ToggleWindowVisibility()
+				}
+			}
+		}(conn)
+	}
+}

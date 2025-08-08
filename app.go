@@ -3,23 +3,20 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
-	"path/filepath"
 
 	"password-manager/internal/crypto"
 	"password-manager/internal/csv"
 	"password-manager/internal/database"
 	"password-manager/internal/generator"
+	"password-manager/internal/paths"
 
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
-	"golang.design/x/hotkey"
-	"golang.design/x/hotkey/mainthread"
 )
 
 // App struct
 type App struct {
 	ctx             context.Context
+	paths           *paths.Paths
 	db              *database.DB
 	masterMgr       *crypto.MasterPasswordManager
 	encKey          *crypto.EncryptionKey
@@ -52,68 +49,28 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	masterMgr, err := crypto.NewMasterPasswordManager()
+	
+	// Initialize master password manager with new paths
+	masterMgr, err := crypto.NewMasterPasswordManagerWithPaths(a.paths)
 	if err != nil {
 		fmt.Printf("Error initializing the Master Password: %v \n", err)
 		return
 	}
 	a.masterMgr = masterMgr
 
-	// init the db
-	homeDir, err := os.UserHomeDir()
+	// Initialize database with new paths
+	db, err := database.NewDB(a.paths.Database())
 	if err != nil {
-		fmt.Printf("Error reading the user directory: %v \n", err)
+		fmt.Printf("Error initializing the db : %v", err)
 		return
-	}
-
-	dbPath := filepath.Join(homeDir, ".password-manager.db")
-	db, err := database.NewDB(dbPath)
-	if err != nil {
-		fmt.Printf("Error initializing thr db : %v", err)
 	}
 	a.db = db
-	
-	// Register hotkey using mainthread - CRITICAL for hotkey to work
-	// Must be called in startup after Wails context is available
-	mainthread.Init(a.registerHotkey)
-}
 
-// registerHotkey implements the correct blocking pattern for golang.design/x/hotkey
-// This is called by mainthread.Init() and handles the hotkey lifecycle
-func (a *App) registerHotkey() {
-	// Create the hotkey (Alt+P) - using Mod1 which is Alt on most Linux systems
-	hk := hotkey.New([]hotkey.Modifier{hotkey.Mod1}, hotkey.KeyP)
-	
-	// Try to register the hotkey
-	err := hk.Register()
-	if err != nil {
-		log.Printf("Failed to register global hotkey Alt+P: %v", err)
-		log.Printf("Application will continue without global hotkey functionality")
-		return
-	}
-	
-	log.Printf("Global hotkey Alt+P registered successfully")
-	
-	// Block and wait for hotkey press (this is the correct pattern!)
-	<-hk.Keydown()
-	
-	// Hotkey was pressed - handle the event
-	log.Printf("Hotkey Alt+P pressed!")
-	if a.ctx != nil {
-		a.ToggleWindowVisibility()
-	}
-	
-	// Unregister this instance (hotkeys are single-use)
-	hk.Unregister()
-	log.Printf("Hotkey unregistered after use")
-	
-	// Recursively re-register for the next hotkey press
-	// This is essential - each hotkey event "consumes" the registration
-	a.registerHotkey()
+	// Hotkey functionality replaced with --toggle flag and Unix socket communication
 }
 
 func (a *App) OnShutdown(ctx context.Context) {
-	// Close database - hotkey cleanup happens automatically
+	// Close database
 	if a.db != nil {
 		a.db.Close()
 	}

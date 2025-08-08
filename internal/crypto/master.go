@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	
+	"password-manager/internal/paths"
 )
 
 const (
@@ -25,7 +27,7 @@ type MasterPasswordManager struct {
 	config     *MasterPasswordConfig
 }
 
-// NewMasterPasswordManager creates a new master password manager
+// NewMasterPasswordManager creates a new master password manager (legacy)
 func NewMasterPasswordManager() (*MasterPasswordManager, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -33,6 +35,22 @@ func NewMasterPasswordManager() (*MasterPasswordManager, error) {
 	}
 
 	configPath := filepath.Join(homeDir, configFileName)
+
+	manager := &MasterPasswordManager{
+		configPath: configPath,
+	}
+
+	// Load existing config or create new one
+	if err := manager.loadConfig(); err != nil {
+		return nil, fmt.Errorf("failed to load config: %w", err)
+	}
+
+	return manager, nil
+}
+
+// NewMasterPasswordManagerWithPaths creates a new master password manager with organized paths
+func NewMasterPasswordManagerWithPaths(appPaths *paths.Paths) (*MasterPasswordManager, error) {
+	configPath := appPaths.Config()
 
 	manager := &MasterPasswordManager{
 		configPath: configPath,
