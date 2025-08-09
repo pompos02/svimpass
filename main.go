@@ -7,7 +7,7 @@ import (
 	"net"
 	"os"
 
-	"password-manager/internal/paths"
+	"svimpass/internal/paths"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -46,7 +46,7 @@ func main() {
 
 	// Create application with options
 	err = wails.Run(&options.App{
-		Title:         "Password Manager",
+		Title:         "svimpass",
 		Width:         600, // Spotlight-like width
 		Height:        50,  // Collapsed height (search input only)
 		MinWidth:      400,
@@ -60,8 +60,8 @@ func main() {
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		BackgroundColour:  &options.RGBA{R: 255, G: 255, B: 255, A: 1}, // White background
-		OnStartup:         app.startup,
+		BackgroundColour: &options.RGBA{R: 255, G: 255, B: 255, A: 1}, // White background
+		OnStartup:        app.startup,
 		OnShutdown: func(ctx context.Context) {
 			app.OnShutdown(ctx)
 			// Cleanup runtime files
@@ -88,7 +88,7 @@ func sendToggleCommand(appPaths *paths.Paths) error {
 		return fmt.Errorf("application not running or socket unavailable")
 	}
 	defer conn.Close()
-	
+
 	_, err = conn.Write([]byte("toggle"))
 	return err
 }
@@ -96,10 +96,10 @@ func sendToggleCommand(appPaths *paths.Paths) error {
 // Start socket listener for toggle commands
 func startSocketListener(app *App, appPaths *paths.Paths) {
 	socketPath := appPaths.Socket()
-	
+
 	// Remove existing socket file
 	os.Remove(socketPath)
-	
+
 	listener, err := net.Listen("unix", socketPath)
 	if err != nil {
 		fmt.Printf("Failed to create socket listener: %v\n", err)
@@ -107,22 +107,22 @@ func startSocketListener(app *App, appPaths *paths.Paths) {
 	}
 	defer listener.Close()
 	defer os.Remove(socketPath)
-	
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			continue
 		}
-		
+
 		go func(c net.Conn) {
 			defer c.Close()
-			
+
 			buf := make([]byte, 1024)
 			n, err := c.Read(buf)
 			if err != nil {
 				return
 			}
-			
+
 			command := string(buf[:n])
 			if command == "toggle" {
 				// Call toggle function on main thread

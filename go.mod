@@ -1,4 +1,4 @@
-module password-manager
+module svimpass
 
 go 1.23
 

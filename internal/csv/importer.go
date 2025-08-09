@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"password-manager/internal/crypto"
-	"password-manager/internal/database"
+	"svimpass/internal/crypto"
+	"svimpass/internal/database"
 )
 
 type CSVEntry struct {

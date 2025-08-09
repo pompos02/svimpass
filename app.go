@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"password-manager/internal/crypto"
-	"password-manager/internal/csv"
-	"password-manager/internal/database"
-	"password-manager/internal/generator"
-	"password-manager/internal/paths"
+	"svimpass/internal/crypto"
+	"svimpass/internal/csv"
+	"svimpass/internal/database"
+	"svimpass/internal/generator"
+	"svimpass/internal/paths"
 
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -49,7 +49,6 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	
 	// Initialize master password manager with new paths
 	masterMgr, err := crypto.NewMasterPasswordManagerWithPaths(a.paths)
 	if err != nil {

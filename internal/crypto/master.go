@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	
-	"password-manager/internal/paths"
+
+	"svimpass/internal/paths"
 )
 
 const (
