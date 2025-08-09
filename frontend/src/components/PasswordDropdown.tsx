@@ -35,7 +35,7 @@ export default function PasswordDropdown({
   return (
     <div className="spotlight-dropdown">
       <div className="dropdown-items" style={{ 
-        maxHeight: `${MAX_VISIBLE_ITEMS * 50}px`, // 50px per item
+        maxHeight: `${MAX_VISIBLE_ITEMS * 60}px`, // 60px per item
         overflowY: hasMoreResults ? 'auto' : 'hidden'
       }}>
         {results.map((entry, index) => (
@@ -47,6 +47,11 @@ export default function PasswordDropdown({
             <div className="entry-main">
               <div className="service-name">{entry.serviceName}</div>
               <div className="username">{entry.username}</div>
+            </div>
+            
+            <div className="entry-details">
+              <div className="created-date">Created: {formatDate(entry.createdAt)}</div>
+              <div className="updated-date">Updated: {formatDate(entry.updatedAt)}</div>
             </div>
             
             <div className="entry-actions">

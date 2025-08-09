@@ -12,7 +12,7 @@ html {
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: transparent;
-  color: #333;
+  color: #e0def4;
   overflow: hidden;
   user-select: none;
 }
@@ -29,7 +29,7 @@ body {
   justify-content: center;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  background: linear-gradient(135deg, #191724 0%, #1f1d2e 100%);
 }
 
 .login-container {
@@ -40,7 +40,7 @@ body {
 }
 
 .login-container h2 {
-  color: #ffffff;
+  color: #e0def4;
   margin-bottom: 2rem;
   font-weight: 300;
   font-size: 1.5rem;
@@ -53,10 +53,10 @@ body {
 .password-input {
   width: 100%;
   padding: 1rem;
-  background: #333;
-  border: 2px solid #444;
+  background: #26233a;
+  border: 2px solid #403d52;
   border-radius: 8px;
-  color: #fff;
+  color: #e0def4;
   font-size: 1rem;
   font-family: 'Courier New', monospace;
   transition: border-color 0.2s;
@@ -64,21 +64,21 @@ body {
 
 .password-input:focus {
   outline: none;
-  border-color: #007acc;
-  background: #3a3a3a;
+  border-color: #c4a7e7;
+  background: #2a273f;
 }
 
 .password-input::placeholder {
-  color: #888;
+  color: #6e6a86;
 }
 
 .submit-button {
   width: 100%;
   padding: 1rem;
-  background: #007acc;
+  background: #c4a7e7;
   border: none;
   border-radius: 8px;
-  color: white;
+  color: #191724;
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -86,17 +86,17 @@ body {
 }
 
 .submit-button:hover {
-  background: #005a9e;
+  background: #b4a1d6;
 }
 
 .submit-button:active {
-  background: #004080;
+  background: #a491c5;
 }
 
 .error-message {
-  color: #ff6b6b;
-  background: rgba(255, 107, 107, 0.1);
-  border: 1px solid rgba(255, 107, 107, 0.3);
+  color: #eb6f92;
+  background: rgba(235, 111, 146, 0.1);
+  border: 1px solid rgba(235, 111, 146, 0.3);
   border-radius: 4px;
   padding: 0.75rem;
   margin: 1rem 0;
@@ -104,18 +104,18 @@ body {
 }
 
 .loading {
-  color: #888;
+  color: #6e6a86;
   font-size: 1rem;
 }
 
 .help-text {
-  color: #888;
+  color: #6e6a86;
   font-size: 0.8rem;
   margin-top: 1rem;
 }
 
 .mode-help {
-  color: #aaa;
+  color: #908caa;
   font-size: 0.75rem;
   font-style: italic;
 }
@@ -127,7 +127,7 @@ body {
   justify-content: center;
   width: 100vw;
   height: 100vh;
-  background: #1a1a1a;
+  background: #191724;
   padding: 2rem;
 }
 
@@ -158,21 +158,21 @@ body {
 }
 
 .mode-indicator.search-mode {
-  background: rgba(0, 122, 204, 0.2);
-  color: #007acc;
-  border: 1px solid rgba(0, 122, 204, 0.3);
+  background: rgba(156, 207, 216, 0.2);
+  color: #9ccfd8;
+  border: 1px solid rgba(156, 207, 216, 0.3);
 }
 
 .mode-indicator.command-mode {
-  background: rgba(255, 140, 0, 0.2);
-  color: #ff8c00;
-  border: 1px solid rgba(255, 140, 0, 0.3);
+  background: rgba(246, 193, 119, 0.2);
+  color: #f6c177;
+  border: 1px solid rgba(246, 193, 119, 0.3);
 }
 
 .mode-indicator.password-mode {
-  background: rgba(139, 92, 246, 0.2);
-  color: #8b5cf6;
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: rgba(196, 167, 231, 0.2);
+  color: #c4a7e7;
+  border: 1px solid rgba(196, 167, 231, 0.3);
 }
 
 .password-toggle {
@@ -182,7 +182,7 @@ body {
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #888;
+  color: #6e6a86;
   cursor: pointer;
   font-size: 16px;
   padding: 4px;
@@ -192,17 +192,17 @@ body {
 }
 
 .password-toggle:hover {
-  color: #e0e0e0;
-  background: rgba(255, 255, 255, 0.1);
+  color: #e0def4;
+  background: rgba(224, 222, 244, 0.1);
 }
 
 .search-input {
   width: 100%;
   padding: 1.2rem 1.5rem 1.2rem 4.5rem;
-  background: #2d2d2d;
-  border: 2px solid #444;
+  background: #26233a;
+  border: 2px solid #403d52;
   border-radius: 12px;
-  color: #fff;
+  color: #e0def4;
   font-size: 1.1rem;
   font-family: 'Courier New', monospace;
   transition: all 0.2s;
@@ -210,35 +210,35 @@ body {
 
 .search-input:focus {
   outline: none;
-  border-color: #007acc;
-  background: #333;
-  box-shadow: 0 0 0 3px rgba(0, 122, 204, 0.1);
+  border-color: #9ccfd8;
+  background: #2a273f;
+  box-shadow: 0 0 0 3px rgba(156, 207, 216, 0.1);
 }
 
 .search-input.command-mode {
-  border-color: #ff8c00;
-  background: #2d2d2d;
+  border-color: #f6c177;
+  background: #26233a;
 }
 
 .search-input.command-mode:focus {
-  border-color: #ff8c00;
-  background: #333;
-  box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
+  border-color: #f6c177;
+  background: #2a273f;
+  box-shadow: 0 0 0 3px rgba(246, 193, 119, 0.1);
 }
 
 .search-input.password-entry-mode {
-  border-color: #8b5cf6;
-  background: #2d2d2d;
+  border-color: #c4a7e7;
+  background: #26233a;
 }
 
 .search-input.password-entry-mode:focus {
-  border-color: #8b5cf6;
-  background: #333;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  border-color: #c4a7e7;
+  background: #2a273f;
+  box-shadow: 0 0 0 3px rgba(196, 167, 231, 0.1);
 }
 
 .search-input::placeholder {
-  color: #666;
+  color: #6e6a86;
 }
 
 .search-input:disabled {
@@ -258,18 +258,18 @@ body {
   top: calc(100% + 0.5rem);
   left: 0;
   right: 0;
-  background: #2d2d2d;
-  border: 2px solid #444;
+  background: #26233a;
+  border: 2px solid #403d52;
   border-radius: 8px;
   max-height: 400px;
   overflow-y: auto;
   z-index: 1000;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(25, 23, 36, 0.5);
 }
 
 .dropdown-item {
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid #403d52;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
@@ -283,11 +283,11 @@ body {
 
 .dropdown-item:hover,
 .dropdown-item.selected {
-  background: #3a3a3a;
+  background: #2a273f;
 }
 
 .dropdown-item.selected {
-  border-left: 4px solid #007acc;
+  border-left: 4px solid #9ccfd8;
 }
 
 .entry-main {
@@ -297,13 +297,13 @@ body {
 
 .service-name {
   font-weight: 600;
-  color: #fff;
+  color: #e0def4;
   font-size: 1rem;
   margin-bottom: 0.25rem;
 }
 
 .username {
-  color: #aaa;
+  color: #908caa;
   font-size: 0.9rem;
   font-family: 'Courier New', monospace;
 }
@@ -315,7 +315,7 @@ body {
 }
 
 .notes {
-  color: #888;
+  color: #6e6a86;
   font-size: 0.8rem;
   margin-bottom: 0.25rem;
   overflow: hidden;
@@ -323,8 +323,9 @@ body {
   white-space: nowrap;
 }
 
-.created-date {
-  color: #666;
+.created-date,
+.updated-date {
+  color: #524f67;
   font-size: 0.7rem;
 }
 
@@ -337,19 +338,19 @@ body {
 .copy-hint,
 .delete-hint {
   font-size: 0.7rem;
-  color: #666;
-  background: #444;
+  color: #524f67;
+  background: #403d52;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
 }
 
 .delete-hint {
-  color: #ff6b6b;
-  background: rgba(255, 107, 107, 0.1);
+  color: #eb6f92;
+  background: rgba(235, 111, 146, 0.1);
 }
 
 .no-results {
-  color: #666;
+  color: #524f67;
   font-style: italic;
   justify-content: center;
 }
@@ -360,8 +361,8 @@ body {
   top: calc(100% + 1rem);
   left: 0;
   right: 0;
-  background: #007acc;
-  color: white;
+  background: #9ccfd8;
+  color: #191724;
   padding: 0.75rem 1rem;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -380,25 +381,25 @@ body {
 }
 
 .password-dropdown::-webkit-scrollbar-track {
-  background: #333;
+  background: #2a273f;
 }
 
 .password-dropdown::-webkit-scrollbar-thumb {
-  background: #555;
+  background: #524f67;
   border-radius: 3px;
 }
 
 .password-dropdown::-webkit-scrollbar-thumb:hover {
-  background: #666;
+  background: #6e6a86;
 }
 
 /* Spotlight-like Window Styles */
 .spotlight-window {
   width: 100vw;
   height: 100vh;
-  background: white;
+  background: #191724;
   border-radius: 0; /* Rectangular edges as requested */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(25, 23, 36, 0.5);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -411,23 +412,23 @@ body {
   padding: 0 20px;
   font-size: 18px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: white;
-  color: #333;
+  background: #191724;
+  color: #e0def4;
   outline: none;
 }
 
 .spotlight-input::placeholder {
-  color: #999;
+  color: #6e6a86;
   transition: color 0.3s ease;
 }
 
 .spotlight-input:focus {
-  background: white;
+  background: #191724;
 }
 
 /* Error/feedback placeholder styling */
 .spotlight-input::placeholder {
-  color: #999;
+  color: #6e6a86;
 }
 
 .spotlight-input[placeholder*="Wrong"],
@@ -441,7 +442,7 @@ body {
 .spotlight-input[placeholder*="Failed"]::placeholder,
 .spotlight-input[placeholder*="cannot"]::placeholder,
 .spotlight-input[placeholder*="do not match"]::placeholder {
-  color: #ff3b30;
+  color: #eb6f92;
 }
 
 @keyframes shake {
@@ -452,8 +453,8 @@ body {
 
 /* Spotlight Dropdown */
 .spotlight-dropdown {
-  background: white;
-  border-top: 1px solid #e5e5e5;
+  background: #191724;
+  border-top: 1px solid #403d52;
   flex: 1;
   overflow: hidden;
 }
@@ -463,9 +464,9 @@ body {
 }
 
 .spotlight-dropdown .dropdown-item {
-  height: 50px;
+  min-height: 60px;
   padding: 10px 20px;
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid #26233a;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -479,17 +480,36 @@ body {
 
 .spotlight-dropdown .dropdown-item:hover,
 .spotlight-dropdown .dropdown-item.selected {
-  background: #f0f8ff;
+  background: #26233a;
 }
 
 .spotlight-dropdown .dropdown-item.selected {
-  background: #007acc;
-  color: white;
+  background: #9ccfd8;
+  color: #191724;
 }
 
 .spotlight-dropdown .entry-main {
   flex: 1;
   min-width: 0;
+}
+
+.spotlight-dropdown .entry-details {
+  flex: 1;
+  margin: 0 1rem;
+  min-width: 0;
+  text-align: right;
+}
+
+.spotlight-dropdown .created-date,
+.spotlight-dropdown .updated-date {
+  color: #524f67;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.spotlight-dropdown .dropdown-item.selected .created-date,
+.spotlight-dropdown .dropdown-item.selected .updated-date {
+  color: rgba(25, 23, 36, 0.6);
 }
 
 .spotlight-dropdown .service-name {
@@ -499,11 +519,12 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: #e0def4;
 }
 
 .spotlight-dropdown .username {
   font-size: 12px;
-  color: #666;
+  color: #908caa;
   font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -511,7 +532,7 @@ body {
 }
 
 .spotlight-dropdown .dropdown-item.selected .username {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(25, 23, 36, 0.8);
 }
 
 .spotlight-dropdown .entry-actions {
@@ -524,8 +545,8 @@ body {
 .spotlight-dropdown .copy-hint,
 .spotlight-dropdown .delete-hint {
   font-size: 11px;
-  color: #999;
-  background: #f5f5f5;
+  color: #6e6a86;
+  background: #26233a;
   padding: 2px 6px;
   border-radius: 3px;
   font-weight: 500;
@@ -533,35 +554,35 @@ body {
 
 .spotlight-dropdown .dropdown-item.selected .copy-hint,
 .spotlight-dropdown .dropdown-item.selected .delete-hint {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  background: rgba(25, 23, 36, 0.2);
+  color: #191724;
 }
 
 .spotlight-dropdown .delete-hint {
-  color: #ff3b30;
-  background: rgba(255, 59, 48, 0.1);
+  color: #eb6f92;
+  background: rgba(235, 111, 146, 0.1);
 }
 
 .spotlight-dropdown .dropdown-item.selected .delete-hint {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  background: rgba(25, 23, 36, 0.2);
+  color: #191724;
 }
 
 .more-results-indicator {
   padding: 8px 20px;
   font-size: 12px;
-  color: #666;
-  background: #f9f9f9;
-  border-top: 1px solid #e5e5e5;
+  color: #6e6a86;
+  background: #1f1d2e;
+  border-top: 1px solid #403d52;
   text-align: center;
 }
 
 .spotlight-dropdown .no-results {
-  height: 50px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #999;
+  color: #6e6a86;
   font-style: italic;
   font-size: 14px;
 }
@@ -572,8 +593,8 @@ body {
   bottom: -60px;
   left: 0;
   right: 0;
-  background: #007acc;
-  color: white;
+  background: #9ccfd8;
+  color: #191724;
   padding: 12px 20px;
   font-size: 14px;
   text-align: center;
@@ -602,10 +623,10 @@ body {
 }
 
 .dropdown-items::-webkit-scrollbar-thumb {
-  background: #ccc;
+  background: #524f67;
   border-radius: 2px;
 }
 
 .dropdown-items::-webkit-scrollbar-thumb:hover {
-  background: #999;
+  background: #6e6a86;
 }
