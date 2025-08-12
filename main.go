@@ -44,8 +44,8 @@ func main() {
 	// Create application with options
 	err = wails.Run(&options.App{
 		Title:         "svimpass",
-		Width:         600, // Spotlight-like width
-		Height:        50,  // Collapsed height (search input only)
+		Width:         600, // Exact input width
+		Height:        50,  // Exact input height
 		MinWidth:      400,
 		MinHeight:     50,
 		MaxWidth:      800,
