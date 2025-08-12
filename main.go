@@ -17,9 +17,6 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
-// Global reference to the Wails context
-var wailsCtx context.Context
-
 func main() {
 	// Initialize application paths
 	appPaths, err := paths.New()
@@ -71,7 +68,7 @@ func main() {
 		},
 		OnBeforeClose:     app.onBeforeClose,
 		HideWindowOnClose: true, // Hide instead of quit when window is closed
-		Bind: []interface{}{
+		Bind: []any{
 			app,
 		},
 	})
@@ -98,7 +95,10 @@ func startSocketListener(app *App, appPaths *paths.Paths) {
 	socketPath := appPaths.Socket()
 
 	// Remove existing socket file
-	os.Remove(socketPath)
+	err := os.Remove(socketPath)
+	if err != nil {
+		fmt.Printf("Error removing the existing socketfile %v", err)
+	}
 
 	listener, err := net.Listen("unix", socketPath)
 	if err != nil {

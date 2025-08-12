@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp, GenerateAndSavePassword, ImportPasswordFromCSV, HideSpotlight, SetWindowCollapsed, SetWindowExpanded } from '../../wailsjs/go/main/App';
+import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp, ExecuteCommand, HideSpotlight, SetWindowCollapsed, SetWindowExpanded } from '../../wailsjs/go/main/App';
 import { PasswordEntry, PasswordEntryState, AddGenCommand, InputMode } from '../types';
-import { main } from '../../wailsjs/go/models';
+import { services } from '../../wailsjs/go/models';
 import { parseCommand, isValidAddCommand, isValidAddGenCommand, isValidImportCommand, formatAddCommandExample, formatAddGenCommandExample, formatImportCommandExample, getCurrentMode, isSearchMode } from '../utils/commandParser';
 import { useSimpleNavigation } from '../hooks/useSimpleNavigation';
 import PasswordDropdown from './PasswordDropdown';
 import { EventsOn } from '../../wailsjs/runtime/runtime';
 
-const { CreatePasswordRequest } = main;
+const { CreatePasswordRequest } = services;
 
 interface MainScreenProps {
   onLogout: () => void;
@@ -250,14 +250,8 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
 
       try {
         setIsLoading(true);
-        const request = new CreatePasswordRequest({
-          serviceName: command.serviceName,
-          username: command.username,
-          password: '', // Will be generated
-          notes: command.notes
-        });
-
-        const generatedPassword = await GenerateAndSavePassword(request);
+        const commandStr = `:addgen ${command.serviceName};${command.username};${command.notes}`;
+        const generatedPassword = await ExecuteCommand(commandStr);
 
         // Copy to clipboard
         await navigator.clipboard.writeText(generatedPassword);
@@ -285,7 +279,8 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
 
       try {
         setIsLoading(true);
-        const importedCount = await ImportPasswordFromCSV(command.filename);
+        const commandStr = `:import ${command.filename}`;
+        const importedCount = await ExecuteCommand(commandStr);
         setMessage(`Successfully imported ${importedCount} passwords from ${command.filename}`);
         setInput('');
       } catch (error) {

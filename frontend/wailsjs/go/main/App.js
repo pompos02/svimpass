@@ -10,6 +10,10 @@ export function DeletePassword(arg1) {
   return window['go']['main']['App']['DeletePassword'](arg1);
 }
 
+export function ExecuteCommand(arg1) {
+  return window['go']['main']['App']['ExecuteCommand'](arg1);
+}
+
 export function ExpandWindow(arg1) {
   return window['go']['main']['App']['ExpandWindow'](arg1);
 }

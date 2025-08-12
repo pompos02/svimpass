@@ -1,4 +1,4 @@
-export namespace main {
+export namespace services {
 	
 	export class CreatePasswordRequest {
 	    serviceName: string;

@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"strings"
-
 	"svimpass/internal/crypto"
 	"svimpass/internal/database"
 )
@@ -20,7 +19,7 @@ type CSVEntry struct {
 func ImportPasswordFromCSV(db *database.DB, encKey *crypto.EncryptionKey, filepath string) (int, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
-		return -1, fmt.Errorf("Error opening the file: %w", err)
+		return -1, fmt.Errorf("error opening the file: %w", err)
 	}
 	defer file.Close()
 	reader := csv.NewReader(file)

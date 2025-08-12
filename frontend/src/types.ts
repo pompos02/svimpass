@@ -1,11 +1,11 @@
 // TypeScript interfaces for the password manager
-import { main } from '../wailsjs/go/models';
+import { services } from '../wailsjs/go/models';
 
 // Use the generated type from Wails
-export type PasswordEntry = main.PasswordEntryResponse;
+export type PasswordEntry = services.PasswordEntryResponse;
 
 // Use the generated type from Wails
-export type CreatePasswordRequest = main.CreatePasswordRequest;
+export type CreatePasswordRequest = services.CreatePasswordRequest;
 
 export interface AppState {
   isLoggedIn: boolean;
