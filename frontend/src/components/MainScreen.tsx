@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp, ExecuteCommand, HideSpotlight, SetWindowCollapsed, SetWindowExpanded } from '../../wailsjs/go/main/App';
-import { PasswordEntry, PasswordEntryState, AddGenCommand, InputMode } from '../types';
+import { PasswordEntry, PasswordEntryState } from '../types';
 import { services } from '../../wailsjs/go/models';
-import { parseCommand, isValidAddCommand, isValidAddGenCommand, isValidImportCommand, formatAddCommandExample, formatAddGenCommandExample, formatImportCommandExample, getCurrentMode, isSearchMode } from '../utils/commandParser';
 import { useSimpleNavigation } from '../hooks/useSimpleNavigation';
 import PasswordDropdown from './PasswordDropdown';
 import { EventsOn } from '../../wailsjs/runtime/runtime';
@@ -28,23 +27,9 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
   });
 
 
-  // Derived mode - no state needed, computed from current application state
-  const getCurrentMode = (): InputMode => {
-    // Priority 1: Password entry mode (highest priority)
-    if (passwordEntryState.isActive) {
-      return 'password'; // During password entry, search is disabled
-    }
-
-    // Priority 2: Command mode (when input starts with :)
-    if (input.trim().startsWith(':')) {
-      return 'command';
-    }
-
-    // Priority 3: Search mode (default)
-    return 'search';
-  };
-
-  const currentMode = getCurrentMode();
+  // Simple mode detection
+  const isCommandMode = () => input.trim().startsWith(':');
+  const isSearchMode = () => !passwordEntryState.isActive && !isCommandMode();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleCopyPassword = async (id: number) => {
@@ -123,13 +108,11 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       return;
     }
 
-    const command = parseCommand(value);
-
-    // Only perform search if in search mode (derived from current state)
-    if (command.type === 'search' && isSearchMode(value)) {
+    // Only perform search if in search mode
+    if (isSearchMode() && value.trim()) {
       try {
         setIsLoading(true);
-        const searchResults = await SearchPasswords(command.query);
+        const searchResults = await SearchPasswords(value.trim());
         setResults(searchResults || []);
         const hasResults = searchResults && searchResults.length > 0;
         setShowDropdown(hasResults);
@@ -160,7 +143,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       } finally {
         setIsLoading(false);
       }
-    } else {
+    } else if (isCommandMode()) {
       // Command mode - hide dropdown and clear results immediately
       setShowDropdown(false);
       setResults([]);
@@ -222,74 +205,65 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
 
     if (input.trim() === '') return;
 
-    const command = parseCommand(input);
-
-    if (command.type === 'add') {
-      if (!isValidAddCommand(command)) {
-        setMessage(`Invalid format. Use: ${formatAddCommandExample()}`);
-        return;
-      }
-
-      // Enter password entry mode
-      setPasswordEntryState({
-        isActive: true,
-        serviceName: command.serviceName,
-        username: command.username,
-        notes: command.notes,
-        showPassword: false
-      });
-      setInput('');
-      setShowDropdown(false);
-      setResults([]);
-      navigation.reset();
-    } else if (command.type === 'addgen') {
-      if (!isValidAddGenCommand(command)) {
-        setMessage(`Invalid format. Use: ${formatAddGenCommandExample()}`);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        const commandStr = `:addgen ${command.serviceName};${command.username};${command.notes}`;
-        const generatedPassword = await ExecuteCommand(commandStr);
-
-        // Copy to clipboard
-        await navigator.clipboard.writeText(generatedPassword);
-
-        // Clear UI state
-        setInput('');
-
-        // Instantly hide window after copying generated password
-        try {
-          await HideSpotlight();
-        } catch (error) {
-          console.error('Failed to hide window after password generation:', error);
+    // Handle command mode
+    if (isCommandMode()) {
+      const trimmedInput = input.trim();
+      const lowerInput = trimmedInput.toLowerCase();
+      
+      // Special case: :add command - parse in frontend and switch to password entry mode
+      if (lowerInput.startsWith(':add ') && !lowerInput.startsWith(':addgen')) {
+        const args = trimmedInput.slice(5); // Remove ':add '
+        const parts = args.split(';').map(p => p.trim());
+        
+        if (parts.length < 2 || !parts[0] || !parts[1]) {
+          setMessage('usage: :add service;username;notes');
+          return;
         }
-      } catch (error) {
-        setMessage('Failed to generate and save password');
-        console.error('Generate and save failed:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    } else if (command.type === 'import') {
-      if (!isValidImportCommand(command)) {
-        setMessage(`Invalid format. Use: ${formatImportCommandExample()}`);
+        
+        // Switch to password entry mode
+        setPasswordEntryState({
+          isActive: true,
+          serviceName: parts[0],
+          username: parts[1],
+          notes: parts[2] || '',
+          showPassword: false
+        });
+        setInput('');
+        setShowDropdown(false);
+        setResults([]);
+        navigation.reset();
         return;
       }
-
+      
+      // All other commands - send directly to backend
       try {
         setIsLoading(true);
-        const commandStr = `:import ${command.filename}`;
-        const importedCount = await ExecuteCommand(commandStr);
-        setMessage(`Successfully imported ${importedCount} passwords from ${command.filename}`);
-        setInput('');
+        const result = await ExecuteCommand(trimmedInput);
+        
+        // Handle different command results
+        if (lowerInput.startsWith(':addgen')) {
+          if (result) {
+            await navigator.clipboard.writeText(result);
+          }
+          setInput('');
+          await HideSpotlight();
+        } else if (lowerInput.startsWith(':import')) {
+          setMessage(`Successfully imported ${result} passwords`);
+          setInput('');
+        } else if (lowerInput.startsWith(':export')) {
+          setMessage('Export completed successfully');
+          setInput('');
+        } else {
+          setInput('');
+        }
+        
       } catch (error) {
-        setMessage(`Failed to import from ${command.filename}: ${error}`);
-        console.error('Import failed:', error);
+        setMessage(String(error));
+        console.error('Command execution failed:', error);
       } finally {
         setIsLoading(false);
       }
-    } else if (command.type === 'search' && navigation.selectedItem) {
+    } else if (navigation.selectedItem) {
       // Copy password to clipboard - handled by navigation hook
       navigation.selectCurrent();
     }
@@ -302,13 +276,10 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       setMessage(`Deleted ${entry?.serviceName || 'entry'}`);
 
       // Refresh results
-      if (input.trim()) {
-        const command = parseCommand(input);
-        if (command.type === 'search') {
-          const searchResults = await SearchPasswords(command.query);
-          setResults(searchResults || []);
-          setShowDropdown(searchResults?.length > 0);
-        }
+      if (input.trim() && isSearchMode()) {
+        const searchResults = await SearchPasswords(input.trim());
+        setResults(searchResults || []);
+        setShowDropdown(searchResults?.length > 0);
       }
       navigation.reset();
     } catch (error) {
@@ -407,13 +378,13 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       return `Enter password for ${passwordEntryState.serviceName}...`;
     }
     if (input.startsWith(':import')) {
-      return formatImportCommandExample();
+      return ':import /absolute/path/to/passwords.csv';
     }
     if (input.startsWith(':addgen')) {
-      return formatAddGenCommandExample();
+      return ':addgen service;username;notes';
     }
     if (input.startsWith(':add')) {
-      return formatAddCommandExample();
+      return ':add service;username;notes';
     }
     return 'Search passwords or type :add to add entry, :addgen to generate, :import to import...';
   };
@@ -422,18 +393,12 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     let className = 'search-input';
     if (passwordEntryState.isActive) {
       className += ' password-entry-mode';
-    } else if (currentMode === 'command') {
+    } else if (isCommandMode()) {
       className += ' command-mode';
     }
     return className;
   };
 
-  const getCurrentDisplayMode = () => {
-    if (passwordEntryState.isActive) {
-      return 'password';
-    }
-    return currentMode;
-  };
 
 
 
