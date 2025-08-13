@@ -137,6 +137,12 @@ body {
   position: relative;
 }
 
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .input-wrapper {
   position: relative;
   display: flex;
@@ -410,11 +416,38 @@ body {
   height: 50px;
   border: none;
   padding: 0 20px;
+  padding-right: 50px; /* Space for eye button */
   font-size: 18px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #191724;
   color: #e0def4;
   outline: none;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #6e6a86; /* Rose Pine muted */
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.password-toggle-btn:hover {
+  color: #908caa; /* Rose Pine subtle */
+  background-color: rgba(110, 106, 134, 0.1); /* Rose Pine muted with transparency */
+}
+
+.password-toggle-btn:active {
+  color: #c4a7e7; /* Rose Pine iris */
+  background-color: rgba(196, 167, 231, 0.1); /* Rose Pine iris with transparency */
 }
 
 .spotlight-input::placeholder {

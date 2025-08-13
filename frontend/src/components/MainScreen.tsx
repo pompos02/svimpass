@@ -359,14 +359,6 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         await handleLock();
       }
 
-      // Toggle password visibility in password entry mode
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'P' && passwordEntryState.isActive) {
-        e.preventDefault();
-        setPasswordEntryState(prev => ({
-          ...prev,
-          showPassword: !prev.showPassword
-        }));
-      }
     };
 
     document.addEventListener('keydown', handleGlobalKeyDown);
@@ -405,19 +397,31 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
   return (
     <div className="spotlight-window">
       <div className="search-container">
-        <input
-          ref={inputRef}
-          type={passwordEntryState.isActive && !passwordEntryState.showPassword ? "password" : "text"}
-          value={input}
-          onChange={handleInputChange}
-          placeholder={getPlaceholder()}
-          className="spotlight-input"
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck="false"
-          disabled={isLoading}
-        />
+        <div className="input-container">
+          <input
+            ref={inputRef}
+            type={passwordEntryState.isActive && !passwordEntryState.showPassword ? "password" : "text"}
+            value={input}
+            onChange={handleInputChange}
+            placeholder={getPlaceholder()}
+            className="spotlight-input"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
+            disabled={isLoading}
+          />
+          {passwordEntryState.isActive && (
+            <button
+              className="password-toggle-btn"
+              onClick={() => setPasswordEntryState(prev => ({ ...prev, showPassword: !prev.showPassword }))}
+              type="button"
+              aria-label="Toggle password visibility"
+            >
+              {passwordEntryState.showPassword ? '●' : '○'}
+            </button>
+          )}
+        </div>
 
         {showDropdown && results.length > 0 && (
           <PasswordDropdown
