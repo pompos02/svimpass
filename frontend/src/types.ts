@@ -13,41 +13,10 @@ export interface AppState {
 }
 
 
-
-export interface AddGenCommand {
-  type: 'addgen';
-  serviceName: string;
-  username: string;
-  notes: string;
-
-}
-
 export interface PasswordEntryState {
   isActive: boolean;
   serviceName: string;
   username: string;
   notes: string;
   showPassword: boolean;
-
 }
-// Command parsing types
-export interface AddCommand {
-  type: 'add';
-  serviceName: string;
-  username: string;
-  notes: string;
-}
-
-export interface SearchCommand {
-  type: 'search';
-  query: string;
-}
-
-export interface ImportCommand {
-  type: 'import';
-  filename: string;
-}
-
-export type Command = AddGenCommand | AddCommand | SearchCommand | ImportCommand;
-
-export type InputMode = 'search' | 'command' | 'password';
