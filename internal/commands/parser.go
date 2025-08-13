@@ -34,6 +34,9 @@ func ParseCommand(input string, passwordSvc *services.PasswordService) (Command,
 		return parseAddGenCommand(args, passwordSvc)
 	case "import":
 		return parseImportCommand(args, passwordSvc)
+	case "export":
+		return parseExportCommand(passwordSvc)
+
 	default:
 		return nil, fmt.Errorf("unknown command: %s", command)
 	}
@@ -113,4 +116,8 @@ func parseImportCommand(args string, passwordSvc *services.PasswordService) (Com
 		PasswordService: passwordSvc,
 		FilePath:        filepath,
 	}, nil
+}
+
+func parseExportCommand(passwordSvc *services.PasswordService) (Command, error) {
+	return &ExportCommand{PasswordService: passwordSvc}, nil
 }

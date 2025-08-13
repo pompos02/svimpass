@@ -51,3 +51,11 @@ type ImportCommand struct {
 func (c *ImportCommand) Execute(ctx context.Context) (any, error) {
 	return c.PasswordService.ImportPasswordFromCSV(c.FilePath)
 }
+
+type ExportCommand struct {
+	PasswordService *services.PasswordService
+}
+
+func (c *ExportCommand) Execute(ctx context.Context) (any, error) {
+	return nil, c.PasswordService.ExportPasswordToCSV()
+}

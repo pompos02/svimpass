@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+
 	"svimpass/internal/csv"
 	"svimpass/internal/database"
 	"svimpass/internal/generator"
@@ -147,4 +148,12 @@ func (ps *PasswordService) ImportPasswordFromCSV(filepath string) (int, error) {
 		return -1, fmt.Errorf("you must unlock the application")
 	}
 	return csv.ImportPasswordFromCSV(ps.db, ps.authSvc.GetEncryptionKey(), filepath)
+}
+
+func (ps *PasswordService) ExportPasswordToCSV() error {
+	if !ps.authSvc.IsUnlocked() {
+		return fmt.Errorf("you must unlock the application")
+	}
+
+	return csv.ExportPasswordToCSV(ps.db, ps.authSvc.encKey)
 }
