@@ -13,7 +13,7 @@ func ParseCommand(input string, passwordSvc *services.PasswordService) (Command,
 
 	// Remove the : prefix
 	if !strings.HasPrefix(input, ":") {
-		return nil, fmt.Errorf("commands must start with :")
+		return nil, fmt.Errorf("put : in the start of your commands")
 	}
 
 	content := input[1:] // Remove ":"
@@ -114,4 +114,3 @@ func parseImportCommand(args string, passwordSvc *services.PasswordService) (Com
 		FilePath:        filepath,
 	}, nil
 }
-

@@ -376,7 +376,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
           navigation.selectPrevious();
         }
         // Delete selected item
-        else if (e.key === 'Delete' && navigation.selectedItem) {
+        else if (e.key === 'd' && e.ctrlKey && navigation.selectedItem) {
           e.preventDefault();
           await handleDelete(navigation.selectedItem.id);
         }
