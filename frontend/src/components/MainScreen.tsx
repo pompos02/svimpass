@@ -87,6 +87,16 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     }
   }, [message]);
 
+  useEffect(() => {
+    // Auto-focus when entering password entry mode (add or edit)
+    if (passwordEntryState.isActive && inputRef.current) {
+      // Use setTimeout to ensure the input is rendered before focusing
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    }
+  }, [passwordEntryState.isActive]);
+
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInput(value);
