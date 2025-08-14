@@ -16,7 +16,7 @@ func ExportPasswordToCSV(db *database.DB, encKey *crypto.EncryptionKey) error {
 	if err != nil {
 		return err
 	}
-	filePath := filepath.Join(homeDir, "Downloads", "users.csv")
+	filePath := filepath.Join(homeDir, "Downloads", "svimapassPasswords.csv")
 	file, err := os.Create(filePath)
 	if err != nil {
 		return err
