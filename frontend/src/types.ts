@@ -19,4 +19,5 @@ export interface PasswordEntryState {
   username: string;
   notes: string;
   showPassword: boolean;
+  editingId?: number;
 }

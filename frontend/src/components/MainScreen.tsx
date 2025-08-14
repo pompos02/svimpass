@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp, ExecuteCommand, HideSpotlight, SetWindowCollapsed, SetWindowExpanded } from '../../wailsjs/go/main/App';
+import { SearchPasswords, CreatePassword, DeletePassword, GetPassword, LockApp, ExecuteCommand, HideSpotlight, SetWindowCollapsed, SetWindowExpanded, UpdatePassword } from '../../wailsjs/go/main/App';
 import { PasswordEntry, PasswordEntryState } from '../types';
 import { services } from '../../wailsjs/go/models';
 import { useSimpleNavigation } from '../hooks/useSimpleNavigation';
@@ -23,7 +23,8 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     serviceName: '',
     username: '',
     notes: '',
-    showPassword: false
+    showPassword: false,
+    editingId: undefined
   });
 
 
@@ -166,14 +167,22 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
 
       try {
         setIsLoading(true);
-        const request = new CreatePasswordRequest({
-          serviceName: passwordEntryState.serviceName,
-          username: passwordEntryState.username,
-          password: input,
-          notes: passwordEntryState.notes
-        });
+        
+        if (passwordEntryState.editingId) {
+          // Edit existing password
+          await UpdatePassword(passwordEntryState.editingId, input);
+          setMessage(`Updated ${passwordEntryState.serviceName}`);
+        } else {
+          // Create new password (existing logic)
+          const request = new CreatePasswordRequest({
+            serviceName: passwordEntryState.serviceName,
+            username: passwordEntryState.username,
+            password: input,
+            notes: passwordEntryState.notes
+          });
 
-        await CreatePassword(request);
+          await CreatePassword(request);
+        }
 
         // Copy password to clipboard
         await navigator.clipboard.writeText(input);
@@ -185,18 +194,19 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
           serviceName: '',
           username: '',
           notes: '',
-          showPassword: false
+          showPassword: false,
+          editingId: undefined
         });
 
         // Instantly hide window after copying password
         try {
           await HideSpotlight();
         } catch (error) {
-          console.error('Failed to hide window after password creation:', error);
+          console.error('Failed to hide window after password operation:', error);
         }
       } catch (error) {
-        setMessage('Failed to add password');
-        console.error('Add password failed:', error);
+        setMessage(passwordEntryState.editingId ? 'Failed to update password' : 'Failed to add password');
+        console.error('Password operation failed:', error);
       } finally {
         setIsLoading(false);
       }
@@ -288,6 +298,30 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     }
   }, [input, results, navigation]);
 
+  const handleEdit = useCallback(async (id: number) => {
+    try {
+      const entry = results.find(r => r.id === id);
+      if (!entry) return;
+      
+      // Switch to password entry mode for editing
+      setPasswordEntryState({
+        isActive: true,
+        serviceName: entry.serviceName,
+        username: entry.username,
+        notes: entry.notes,
+        showPassword: false,
+        editingId: id
+      });
+      setInput('');
+      setShowDropdown(false);
+      setResults([]);
+      navigation.reset();
+    } catch (error) {
+      setMessage('Failed to edit entry');
+      console.error('Edit failed:', error);
+    }
+  }, [results, navigation]);
+
   const handleLock = useCallback(async () => {
     try {
       await LockApp();
@@ -311,7 +345,8 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
           serviceName: '',
           username: '',
           notes: '',
-          showPassword: false
+          showPassword: false,
+          editingId: undefined
         });
         navigation.reset();
 
@@ -351,6 +386,11 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
           e.preventDefault();
           await handleDelete(navigation.selectedItem.id);
         }
+        // Edit selected item
+        else if (e.key === 'e' && e.ctrlKey && navigation.selectedItem) {
+          e.preventDefault();
+          await handleEdit(navigation.selectedItem.id);
+        }
       }
 
       // Global shortcuts
@@ -363,10 +403,13 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
 
     document.addEventListener('keydown', handleGlobalKeyDown);
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [showDropdown, results, navigation, handleSubmit, handleDelete, handleLock]);
+  }, [showDropdown, results, navigation, handleSubmit, handleDelete, handleEdit, handleLock]);
 
   const getPlaceholder = () => {
     if (passwordEntryState.isActive) {
+      if (passwordEntryState.editingId) {
+        return `Enter new password for ${passwordEntryState.serviceName}...`;
+      }
       return `Enter password for ${passwordEntryState.serviceName}...`;
     }
     if (input.startsWith(':import')) {
