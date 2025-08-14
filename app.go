@@ -117,6 +117,10 @@ func (a *App) DeletePassword(id int) error {
 	return a.passwordSvc.DeletePassword(id)
 }
 
+func (a *App) UpdatePassword(id int, newpassword string) error {
+	return a.passwordSvc.UpdatePasswordEntry(id, newpassword)
+}
+
 func (a *App) ToggleWindow() {
 	if a.ctx == nil {
 		fmt.Println("Context is nil in ToggleWindow!")

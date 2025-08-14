@@ -143,6 +143,36 @@ func (ps *PasswordService) DeletePassword(id int) error {
 	return ps.db.DeletePasswordEntry(id)
 }
 
+func (ps *PasswordService) UpdatePasswordEntry(id int, newpassword string) error {
+	if !ps.authSvc.IsUnlocked() {
+		return fmt.Errorf("app is locked")
+	}
+
+	currentEntry, err := ps.db.GetPasswordEntry(id)
+	if err != nil {
+		return fmt.Errorf("error getting the password you want to edit: %w", err)
+	}
+
+	newEncryptedPassword, err := ps.authSvc.GetEncryptionKey().Encrypt(newpassword)
+	if err != nil {
+		return err
+	}
+	newEntry := &database.PasswordEntry{
+		ID:                currentEntry.ID,
+		ServiceName:       currentEntry.ServiceName,
+		Username:          currentEntry.Username,
+		EncryptedPassword: newEncryptedPassword,
+		Notes:             currentEntry.Notes,
+	}
+
+	err = ps.db.UpdatePasswordEntry(newEntry)
+	if err != nil {
+		return fmt.Errorf("error updating the password entry %w", err)
+	}
+
+	return nil
+}
+
 func (ps *PasswordService) ImportPasswordFromCSV(filepath string) (int, error) {
 	if !ps.authSvc.IsUnlocked() {
 		return -1, fmt.Errorf("you must unlock the application")

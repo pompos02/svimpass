@@ -101,3 +101,7 @@ export function ToggleWindowVisibility() {
 export function UnlockApp(arg1) {
   return window['go']['main']['App']['UnlockApp'](arg1);
 }
+
+export function UpdatePassword(arg1, arg2) {
+  return window['go']['main']['App']['UpdatePassword'](arg1, arg2);
+}

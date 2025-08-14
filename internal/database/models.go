@@ -21,12 +21,3 @@ type CreatePasswordRequest struct {
 	Password    string
 	Notes       string
 }
-
-// UpdatePasswordRequest files for Password upafate
-type UpdatePasswordRequest struct {
-	ID          int
-	ServiceName string
-	Username    string
-	Password    string
-	Notes       string
-}

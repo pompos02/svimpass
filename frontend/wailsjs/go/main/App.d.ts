@@ -52,3 +52,5 @@ export function ToggleWindow():Promise<void>;
 export function ToggleWindowVisibility():Promise<void>;
 
 export function UnlockApp(arg1:string):Promise<void>;
+
+export function UpdatePassword(arg1:number,arg2:string):Promise<void>;
