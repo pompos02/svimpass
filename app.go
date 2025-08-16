@@ -238,7 +238,9 @@ func (a *App) SetWindowExpanded() {
 		return
 	}
 
-	wailsruntime.WindowSetSize(a.ctx, 600, 250)
+	// Calculate exact height for seamless 4-entry display:
+	// Input box: 50px + 4 entries × 60px + border: 1px + dropdown border: 1px = 292px
+	wailsruntime.WindowSetSize(a.ctx, 600, 292)
 	wailsruntime.WindowCenter(a.ctx)
 }
 

@@ -499,7 +499,7 @@ body {
 .spotlight-dropdown {
   background: var(--rp-base);
   border-top: 1px solid var(--rp-border);
-  flex: 1;
+  height: 240px; /* Exactly 4 entries × 60px = 240px */
   overflow: hidden;
 }
 

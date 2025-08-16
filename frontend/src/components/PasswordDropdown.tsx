@@ -68,7 +68,7 @@ export default function PasswordDropdown({
         ref={dropdownRef}
         className="dropdown-items" 
         style={{ 
-          maxHeight: `${MAX_VISIBLE_ITEMS * 60}px`, // 60px per item
+          height: '240px', // Fixed height for exactly 4 entries (4 × 60px)
           overflowY: hasMoreResults ? 'auto' : 'hidden'
         }}
       >
