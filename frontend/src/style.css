@@ -1,12 +1,37 @@
+:root {
+  --rp-base: #191724;
+  --rp-surface: #1f1d2e;
+  --rp-overlay: #26233a;
+  --rp-muted: #6e6a86;
+  --rp-subtle: #908caa;
+  --rp-text: #e0def4;
+  --rp-love: #eb6f92;
+  --rp-gold: #f6c177;
+  --rp-rose: #ebbcba;
+  --rp-pine: #31748f;
+  --rp-foam: #9ccfd8;
+  --rp-iris: #c4a7e7;
+  --rp-surface-highlight: #2a273f;
+  --rp-border: #403d52;
+  --rp-border-highlight: #524f67;
+  --rp-primary: #c4a7e7;
+  --rp-secondary: #9ccfd8;
+  --rp-accent: #f6c177;
+  --rp-success: #9ccfd8;
+  --rp-warning: #f6c177;
+  --rp-error: #eb6f92;
+  --rp-info: #31748f;
+}
+
 html {
-    background-color: #191724;
+    background-color: var(--rp-base);
     text-align: center;
-    color: #e0def4;
+    color: var(--rp-text);
 }
 
 body {
     margin: 0;
-    color: #e0def4;
+    color: var(--rp-text);
     font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
     "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
