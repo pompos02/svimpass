@@ -68,7 +68,7 @@ func (a *App) OnShutdown(ctx context.Context) {
 	if a.hotkeyManager != nil {
 		a.hotkeyManager.Stop()
 	}
-	
+
 	// Close database
 	if a.db != nil {
 		a.db.Close()
@@ -153,6 +153,7 @@ func (a *App) ToggleWindow() {
 
 // ToggleWindowVisibility toggles the window visibility (used by global hotkey)
 func (a *App) ToggleWindowVisibility() {
+	fmt.Println("🎯 ToggleWindowVisibility called from hotkey!")
 	a.ToggleWindow()
 }
 

@@ -8,8 +8,10 @@ require (
 	golang.org/x/crypto v0.33.0
 )
 
-// Conditional dependency - only included in Windows and macOS builds
-require golang.design/x/hotkey v0.4.1
+require github.com/vcaesar/keycode v0.10.1 // indirect
+
+// Cross-platform hotkey library for global hotkey support
+require github.com/robotn/gohook v0.42.2
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
@@ -35,7 +37,6 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/wailsapp/go-webview2 v1.0.19 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
-	golang.design/x/mainthread v0.3.0 // indirect
 	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
