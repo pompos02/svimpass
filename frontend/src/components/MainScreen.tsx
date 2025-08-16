@@ -106,6 +106,10 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       return;
     }
 
+    // Use the new value for mode detection, not the stale input state
+    const isCurrentCommandMode = value.trim().startsWith(':');
+    const isCurrentSearchMode = !passwordEntryState.isActive && !isCurrentCommandMode;
+
     if (value.trim() === '') {
       setShowDropdown(false);
       setResults([]);
@@ -120,7 +124,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     }
 
     // Only perform search if in search mode
-    if (isSearchMode() && value.trim()) {
+    if (isCurrentSearchMode && value.trim()) {
       try {
         setIsLoading(true);
         const searchResults = await SearchPasswords(value.trim());
@@ -154,7 +158,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       } finally {
         setIsLoading(false);
       }
-    } else if (isCommandMode()) {
+    } else if (isCurrentCommandMode) {
       // Command mode - hide dropdown and clear results immediately
       setShowDropdown(false);
       setResults([]);
@@ -457,7 +461,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
             value={input}
             onChange={handleInputChange}
             placeholder={getPlaceholder()}
-            className="spotlight-input"
+            className={`spotlight-input ${getInputClassName()}`}
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"

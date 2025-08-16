@@ -222,14 +222,11 @@ body {
 }
 
 .search-input.command-mode {
-  border-color: var(--rp-gold);
-  background: var(--rp-overlay);
+  box-shadow: inset 0 0 0 2px var(--rp-gold);
 }
 
 .search-input.command-mode:focus {
-  border-color: var(--rp-gold);
-  background: var(--rp-surface-highlight);
-  box-shadow: 0 0 0 3px rgba(246, 193, 119, 0.1);
+  box-shadow: inset 0 0 0 2px var(--rp-gold);
 }
 
 .search-input.password-entry-mode {
@@ -414,7 +411,8 @@ body {
 .spotlight-input {
   width: 100%;
   height: 50px;
-  border: none;
+  border: 2px solid var(--rp-base);
+  border-radius: 0;
   padding: 0 20px;
   padding-right: 50px; /* Space for eye button */
   font-size: 18px;
@@ -457,6 +455,19 @@ body {
 
 .spotlight-input:focus {
   background: var(--rp-base);
+  border-color: var(--rp-base);
+  border-radius: 0;
+}
+
+/* Command mode styling for spotlight input */
+.spotlight-input.command-mode {
+  border-radius: 0;
+  box-shadow: inset 0 0 0 2px var(--rp-gold);
+}
+
+.spotlight-input.command-mode:focus {
+  border-radius: 0;
+  box-shadow: inset 0 0 0 2px var(--rp-gold);
 }
 
 /* Error/feedback placeholder styling */
