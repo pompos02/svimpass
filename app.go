@@ -7,6 +7,7 @@ import (
 	"svimpass/internal/commands"
 	"svimpass/internal/crypto"
 	"svimpass/internal/database"
+	"svimpass/internal/hotkey"
 	"svimpass/internal/paths"
 	"svimpass/internal/services"
 
@@ -20,7 +21,8 @@ type App struct {
 	db              *database.DB
 	authSvc         *services.AuthService
 	passwordSvc     *services.PasswordService
-	isWindowVisible bool // Track window visibility state
+	hotkeyManager   hotkey.HotkeyManager // Platform-specific hotkey manager
+	isWindowVisible bool                 // Track window visibility state
 }
 
 // NewApp creates a new App application struct
@@ -51,10 +53,22 @@ func (a *App) startup(ctx context.Context) {
 	a.authSvc = services.NewAuthService(masterMgr)
 	a.passwordSvc = services.NewPasswordService(db, a.authSvc)
 
-	// Hotkey functionality replaced with --toggle flag and Unix socket communication
+	// Initialize platform-specific hotkey manager
+	a.hotkeyManager = hotkey.NewManager()
+	if err := a.hotkeyManager.Start(a.ToggleWindowVisibility); err != nil {
+		fmt.Printf("Hotkey initialization failed: %v\n", err)
+		fmt.Printf("Hotkey status: %s\n", a.hotkeyManager.GetDescription())
+	} else {
+		fmt.Printf("Hotkey manager started: %s\n", a.hotkeyManager.GetDescription())
+	}
 }
 
 func (a *App) OnShutdown(ctx context.Context) {
+	// Stop hotkey manager
+	if a.hotkeyManager != nil {
+		a.hotkeyManager.Stop()
+	}
+	
 	// Close database
 	if a.db != nil {
 		a.db.Close()
