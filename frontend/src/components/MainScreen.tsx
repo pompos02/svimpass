@@ -388,12 +388,26 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         // Down navigation: Arrow Down
         if (e.key === 'ArrowDown') {
           e.preventDefault();
-          navigation.selectNext();
+          // If currently no selection (-1), start with first item (0)
+          if (navigation.selectedIndex === -1) {
+            navigation.selectItem(0);
+          } else {
+            navigation.selectNext();
+          }
         }
         // Up navigation: Arrow Up
         else if (e.key === 'ArrowUp') {
           e.preventDefault();
-          navigation.selectPrevious();
+          // If currently on first item (0), go back to input (-1)
+          if (navigation.selectedIndex === 0) {
+            navigation.reset(); // This sets selectedIndex to -1
+            // Focus back to input field
+            if (inputRef.current) {
+              inputRef.current.focus();
+            }
+          } else {
+            navigation.selectPrevious();
+          }
         }
         // Delete selected item
         else if (e.key === 'd' && e.ctrlKey && navigation.selectedItem) {

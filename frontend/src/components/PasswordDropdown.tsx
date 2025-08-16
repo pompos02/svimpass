@@ -29,28 +29,40 @@ export default function PasswordDropdown({
     }
   };
 
-  // Auto-scroll selected item into view within the dropdown container
+  // Auto-scroll selected item into view with precise one-entry movement
   useEffect(() => {
     if (navigation.selectedIndex >= 0 && dropdownRef.current) {
       const selectedElement = dropdownRef.current.querySelector(`[data-index="${navigation.selectedIndex}"]`) as HTMLElement;
       if (selectedElement) {
         const container = dropdownRef.current;
-        const containerRect = container.getBoundingClientRect();
-        const elementRect = selectedElement.getBoundingClientRect();
+        const containerHeight = 240; // Fixed container height
+        const entryHeight = 60; // Fixed entry height
+        const visibleEntries = 4; // Exactly 4 entries visible
         
-        // Check if element is outside the visible area
-        const isAboveView = elementRect.top < containerRect.top;
-        const isBelowView = elementRect.bottom > containerRect.bottom;
+        // Calculate which "page" of 4 entries the selected item should be on
+        const selectedItemIndex = navigation.selectedIndex;
+        const targetScrollPosition = Math.max(0, Math.floor(selectedItemIndex / visibleEntries) * (visibleEntries * entryHeight));
         
-        if (isAboveView || isBelowView) {
-          // Calculate scroll position to center the element
-          const elementOffset = selectedElement.offsetTop;
-          const containerHeight = container.clientHeight;
-          const elementHeight = selectedElement.clientHeight;
-          const scrollPosition = elementOffset - (containerHeight / 2) + (elementHeight / 2);
+        // Only scroll if the item is not fully visible
+        const currentScrollTop = container.scrollTop;
+        const itemTop = selectedItemIndex * entryHeight;
+        const itemBottom = itemTop + entryHeight;
+        const viewportTop = currentScrollTop;
+        const viewportBottom = currentScrollTop + containerHeight;
+        
+        if (itemTop < viewportTop || itemBottom > viewportBottom) {
+          // Scroll one entry at a time for smooth navigation
+          let newScrollTop;
+          if (itemTop < viewportTop) {
+            // Scrolling up - show the selected item at the top
+            newScrollTop = itemTop;
+          } else {
+            // Scrolling down - show the selected item at the bottom
+            newScrollTop = itemBottom - containerHeight;
+          }
           
           container.scrollTo({
-            top: Math.max(0, scrollPosition),
+            top: Math.max(0, newScrollTop),
             behavior: 'smooth'
           });
         }

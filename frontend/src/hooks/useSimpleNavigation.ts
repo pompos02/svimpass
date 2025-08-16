@@ -34,6 +34,8 @@ export const useSimpleNavigation = ({
     
     setSelectedIndex(prev => {
       const next = prev + 1;
+      // If we're at the last item, go back to first item (0)
+      // This maintains the circular navigation within the dropdown
       return next >= items.length ? 0 : next;
     });
   }, [isOpen, items.length]);
@@ -43,7 +45,9 @@ export const useSimpleNavigation = ({
     
     setSelectedIndex(prev => {
       const next = prev - 1;
-      return next < 0 ? items.length - 1 : next;
+      // When going up from first item (index 0), go to input (-1)
+      // When going up from input (-1), go to last item
+      return next < -1 ? items.length - 1 : next;
     });
   }, [isOpen, items.length]);
 
