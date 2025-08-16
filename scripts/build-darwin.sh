@@ -16,4 +16,4 @@ GOOS=darwin GOARCH=amd64 wails build -tags "desktop,production,darwin"
 
 echo "macOS build completed successfully!"
 echo "Binary location: build/bin/svimpass.app"
-echo "Global hotkey: Cmd+Alt+Space"
+echo "Global hotkey: Ctrl+Shift+P"
