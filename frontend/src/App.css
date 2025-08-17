@@ -631,32 +631,6 @@ body {
   font-size: 14px;
 }
 
-/* Spotlight Message */
-.spotlight-message {
-  position: absolute;
-  bottom: -60px;
-  left: 0;
-  right: 0;
-  background: var(--rp-foam);
-  color: var(--rp-base);
-  padding: 12px 20px;
-  font-size: 14px;
-  text-align: center;
-  border-radius: 0 0 8px 8px;
-  animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
 /* Custom scrollbar for dropdown */
 .dropdown-items::-webkit-scrollbar {
   width: 4px;
