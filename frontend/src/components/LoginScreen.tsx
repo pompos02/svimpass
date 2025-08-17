@@ -48,6 +48,12 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
     } catch (err) {
       setPlaceholder('Failed to initialize');
       setLoading(false);
+      setTimeout(() => setPlaceholder('Enter Master Password'), 2000);
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 100);
     }
   };
 
@@ -84,7 +90,13 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
           onLogin();
         } catch (err) {
           setPlaceholder('Failed to setup master password');
+          setConfirmPassword('');
           setTimeout(() => setPlaceholder('Confirm Master Password'), 2000);
+          setTimeout(() => {
+            if (inputRef.current) {
+              inputRef.current.focus();
+            }
+          }, 100);
         }
       }
     } else {

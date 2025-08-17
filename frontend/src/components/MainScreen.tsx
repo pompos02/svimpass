@@ -17,7 +17,8 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
   const [results, setResults] = useState<PasswordEntry[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [placeholder, setPlaceholder] = useState('');
+  const [isShowingMessage, setIsShowingMessage] = useState(false);
   const [passwordEntryState, setPasswordEntryState] = useState<PasswordEntryState>({
     isActive: false,
     serviceName: '',
@@ -51,7 +52,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       }
 
     } catch (error) {
-      setMessage('Failed to copy password');
+      showMessage('Failed to copy password');
       console.error('Copy password failed:', error);
     }
   };
@@ -80,12 +81,69 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
   }, []);
 
   useEffect(() => {
-    // Clear message after 3 seconds
-    if (message) {
-      const timer = setTimeout(() => setMessage(''), 3000);
-      return () => clearTimeout(timer);
+    // Don't update placeholder if we're showing an error/success message
+    if (isShowingMessage) return;
+    
+    // Update placeholder based on current state
+    if (passwordEntryState.isActive) {
+      if (passwordEntryState.editingId) {
+        setPlaceholder(`Enter new password for ${passwordEntryState.serviceName}...`);
+      } else {
+        setPlaceholder(`Enter password for ${passwordEntryState.serviceName}...`);
+      }
+    } else if (input.startsWith(':import')) {
+      setPlaceholder(':import /absolute/path/to/passwords.csv');
+    } else if (input.startsWith(':addgen')) {
+      setPlaceholder(':addgen service;username;notes');
+    } else if (input.startsWith(':add')) {
+      setPlaceholder(':add service;username;notes');
+    } else {
+      setPlaceholder('Search passwords or type :add to add entry, :addgen to generate, :import to import...');
     }
-  }, [message]);
+  }, [passwordEntryState.isActive, passwordEntryState.editingId, passwordEntryState.serviceName, input, isShowingMessage]);
+
+  // Helper function to show error messages
+  const showMessage = (message: string) => {
+    setIsShowingMessage(true);
+    setPlaceholder(message);
+    setInput('');
+    setTimeout(() => {
+      setIsShowingMessage(false);
+      // This will trigger the useEffect to set the appropriate placeholder
+    }, 2000);
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 100);
+  };
+
+  // Helper function to show success messages that don't clear input (used before window operations)
+  const showSuccessMessage = (message: string) => {
+    setIsShowingMessage(true);
+    setPlaceholder(message);
+    setTimeout(() => {
+      setIsShowingMessage(false);
+    }, 2000);
+  };
+
+  // Helper function for password entry mode errors (restores to password entry placeholder)
+  const showPasswordEntryError = (message: string) => {
+    setIsShowingMessage(true);
+    setPlaceholder(message);
+    setInput('');
+    setTimeout(() => {
+      setIsShowingMessage(false);
+      // This will trigger the useEffect to set the password entry placeholder
+    }, 2000);
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 100);
+  };
+
+
 
   useEffect(() => {
     // Auto-focus when entering password entry mode (add or edit)
@@ -185,7 +243,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         if (passwordEntryState.editingId) {
           // Edit existing password
           await UpdatePassword(passwordEntryState.editingId, input);
-          setMessage(`Updated ${passwordEntryState.serviceName}`);
+          showSuccessMessage(`Updated ${passwordEntryState.serviceName}`);
         } else {
           // Create new password (existing logic)
           const request = new CreatePasswordRequest({
@@ -219,7 +277,8 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
           console.error('Failed to hide window after password operation:', error);
         }
       } catch (error) {
-        setMessage(passwordEntryState.editingId ? 'Failed to update password' : 'Failed to add password');
+        const errorMsg = passwordEntryState.editingId ? 'Failed to update password' : 'Failed to add password';
+        showPasswordEntryError(errorMsg);
         console.error('Password operation failed:', error);
       } finally {
         setIsLoading(false);
@@ -234,13 +293,19 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       const trimmedInput = input.trim();
       const lowerInput = trimmedInput.toLowerCase();
       
+      // Frontend validation for :add command without arguments
+      if (lowerInput === ':add') {
+        showMessage('usage: :add service;username;notes');
+        return;
+      }
+      
       // Special case: :add command - parse in frontend and switch to password entry mode
       if (lowerInput.startsWith(':add ') && !lowerInput.startsWith(':addgen')) {
         const args = trimmedInput.slice(5); // Remove ':add '
         const parts = args.split(';').map(p => p.trim());
         
         if (parts.length < 2 || !parts[0] || !parts[1]) {
-          setMessage('usage: :add service;username;notes');
+          showMessage('usage: :add service;username;notes');
           return;
         }
         
@@ -272,17 +337,15 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
           setInput('');
           await HideSpotlight();
         } else if (lowerInput.startsWith(':import')) {
-          setMessage(`Successfully imported ${result} passwords`);
-          setInput('');
+          showMessage(`Successfully imported ${result} passwords`);
         } else if (lowerInput.startsWith(':export')) {
-          setMessage('Export completed successfully');
-          setInput('');
+          showMessage('Export completed successfully');
         } else {
           setInput('');
         }
         
       } catch (error) {
-        setMessage(String(error));
+        showMessage(String(error));
         console.error('Command execution failed:', error);
       } finally {
         setIsLoading(false);
@@ -297,7 +360,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     try {
       const entry = results.find(r => r.id === id);
       await DeletePassword(id);
-      setMessage(`Deleted ${entry?.serviceName || 'entry'}`);
+      showMessage(`Deleted ${entry?.serviceName || 'entry'}`);
 
       // Refresh results
       if (input.trim() && isSearchMode()) {
@@ -307,7 +370,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       }
       navigation.reset();
     } catch (error) {
-      setMessage('Failed to delete entry');
+      showMessage('Failed to delete entry');
       console.error('Delete failed:', error);
     }
   }, [input, results, navigation]);
@@ -331,7 +394,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       setResults([]);
       navigation.reset();
     } catch (error) {
-      setMessage('Failed to edit entry');
+      showMessage('Failed to edit entry');
       console.error('Edit failed:', error);
     }
   }, [results, navigation]);
@@ -353,7 +416,6 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         setInput('');
         setShowDropdown(false);
         setResults([]);
-        setMessage('');
         setPasswordEntryState({
           isActive: false,
           serviceName: '',
@@ -433,24 +495,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
   }, [showDropdown, results, navigation, handleSubmit, handleDelete, handleEdit, handleLock]);
 
-  const getPlaceholder = () => {
-    if (passwordEntryState.isActive) {
-      if (passwordEntryState.editingId) {
-        return `Enter new password for ${passwordEntryState.serviceName}...`;
-      }
-      return `Enter password for ${passwordEntryState.serviceName}...`;
-    }
-    if (input.startsWith(':import')) {
-      return ':import /absolute/path/to/passwords.csv';
-    }
-    if (input.startsWith(':addgen')) {
-      return ':addgen service;username;notes';
-    }
-    if (input.startsWith(':add')) {
-      return ':add service;username;notes';
-    }
-    return 'Search passwords or type :add to add entry, :addgen to generate, :import to import...';
-  };
+
 
   const getInputClassName = () => {
     let className = 'search-input';
@@ -474,7 +519,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
             type={passwordEntryState.isActive && !passwordEntryState.showPassword ? "password" : "text"}
             value={input}
             onChange={handleInputChange}
-            placeholder={getPlaceholder()}
+            placeholder={placeholder}
             className={`spotlight-input ${getInputClassName()}`}
             autoComplete="off"
             autoCorrect="off"
@@ -502,7 +547,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
           />
         )}
 
-        {message && <div className="spotlight-message">{message}</div>}
+
       </div>
     </div>
   );
