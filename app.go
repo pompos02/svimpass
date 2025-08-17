@@ -153,7 +153,6 @@ func (a *App) ToggleWindow() {
 
 // ToggleWindowVisibility toggles the window visibility (used by global hotkey)
 func (a *App) ToggleWindowVisibility() {
-	fmt.Println("🎯 ToggleWindowVisibility called from hotkey!")
 	a.ToggleWindow()
 }
 

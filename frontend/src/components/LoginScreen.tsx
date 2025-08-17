@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { IsInitialized, SetupMasterPassword, UnlockApp } from '../../wailsjs/go/main/App';
+import { IsInitialized, SetupMasterPassword, UnlockApp, HideSpotlight } from '../../wailsjs/go/main/App';
 
 interface LoginScreenProps {
   onLogin: () => void;
@@ -124,7 +124,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = async (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleSubmit();
@@ -134,9 +134,17 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         setCurrentStep('password');
         setConfirmPassword('');
       } else {
+        // Clear UI state
         setPassword('');
         setConfirmPassword('');
         setCurrentStep('password');
+        
+        // Hide the window (same behavior as MainScreen)
+        try {
+          await HideSpotlight();
+        } catch (error) {
+          console.error('Failed to hide window:', error);
+        }
       }
     }
   };
