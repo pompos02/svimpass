@@ -8,6 +8,66 @@ import { EventsOn } from '../../wailsjs/runtime/runtime';
 
 const { CreatePasswordRequest } = services;
 
+// Help commands data - formatted like PasswordEntry for component reuse
+const HELP_COMMANDS: PasswordEntry[] = [
+  { 
+    id: 1, 
+    serviceName: ':add service;username;notes', 
+    username: 'Add new password entry', 
+    notes: 'Creates a new password entry with specified details', 
+    createdAt: '', 
+    updatedAt: '' 
+  },
+  { 
+    id: 2, 
+    serviceName: ':addgen service;username;notes', 
+    username: 'Add with generated password', 
+    notes: 'Creates entry with auto-generated secure password', 
+    createdAt: '', 
+    updatedAt: '' 
+  },
+  { 
+    id: 3, 
+    serviceName: ':import /path/to/file.csv', 
+    username: 'Import passwords from CSV', 
+    notes: 'Import passwords from CSV file with absolute path', 
+    createdAt: '', 
+    updatedAt: '' 
+  },
+  { 
+    id: 4, 
+    serviceName: ':export', 
+    username: 'Export all passwords', 
+    notes: 'Export all passwords to CSV file', 
+    createdAt: '', 
+    updatedAt: '' 
+  },
+  { 
+    id: 5, 
+    serviceName: 'Ctrl+L', 
+    username: 'Lock application', 
+    notes: 'Lock the application and return to login screen', 
+    createdAt: '', 
+    updatedAt: '' 
+  },
+  { 
+    id: 6, 
+    serviceName: 'Ctrl+D', 
+    username: 'Delete selected entry', 
+    notes: 'Delete the currently selected password entry', 
+    createdAt: '', 
+    updatedAt: '' 
+  },
+  { 
+    id: 7, 
+    serviceName: 'Ctrl+E', 
+    username: 'Edit selected entry', 
+    notes: 'Edit the currently selected password entry', 
+    createdAt: '', 
+    updatedAt: '' 
+  }
+];
+
 interface MainScreenProps {
   onLogout: () => void;
 }
@@ -31,6 +91,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
 
   // Simple mode detection
   const isCommandMode = () => input.trim().startsWith(':');
+  const isHelpMode = () => input.trim() === ':help';
   const isSearchMode = () => !passwordEntryState.isActive && !isCommandMode();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -97,8 +158,10 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
       setPlaceholder(':addgen service;username;notes');
     } else if (input.startsWith(':add')) {
       setPlaceholder(':add service;username;notes');
+    } else if (input.startsWith(':help')) {
+      setPlaceholder('Select a command from the help list below');
     } else {
-      setPlaceholder('Search passwords or type :add to add entry, :addgen to generate, :import to import...');
+      setPlaceholder('Search passwords or type :help for commands, :add to add entry...');
     }
   }, [passwordEntryState.isActive, passwordEntryState.editingId, passwordEntryState.serviceName, input, isShowingMessage]);
 
@@ -166,6 +229,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
 
     // Use the new value for mode detection, not the stale input state
     const isCurrentCommandMode = value.trim().startsWith(':');
+    const isCurrentHelpMode = value.trim() === ':help';
     const isCurrentSearchMode = !passwordEntryState.isActive && !isCurrentCommandMode;
 
     if (value.trim() === '') {
@@ -177,6 +241,20 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         await SetWindowCollapsed();
       } catch (error) {
         console.error('Failed to collapse window:', error);
+      }
+      return;
+    }
+
+    // Handle help mode - show help commands
+    if (isCurrentHelpMode) {
+      setResults(HELP_COMMANDS);
+      setShowDropdown(true);
+      navigation.reset();
+      // Expand window to show help
+      try {
+        await SetWindowExpanded();
+      } catch (error) {
+        console.error('Failed to expand window:', error);
       }
       return;
     }
@@ -287,6 +365,19 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     }
 
     if (input.trim() === '') return;
+
+    // Handle help mode - when user selects a help command
+    if (isHelpMode() && navigation.selectedItem) {
+      const selectedHelp = navigation.selectedItem;
+      // If it's a command (starts with :), insert it into input
+      if (selectedHelp.serviceName.startsWith(':')) {
+        setInput(selectedHelp.serviceName);
+        setShowDropdown(false);
+        setResults([]);
+        navigation.reset();
+      }
+      return;
+    }
 
     // Handle command mode
     if (isCommandMode()) {
