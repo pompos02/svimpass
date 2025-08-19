@@ -77,6 +77,14 @@ const HELP_COMMANDS: PasswordEntry[] = [
         createdAt: "",
         updatedAt: "",
     },
+    {
+        id: 8,
+        serviceName: ":reset!",
+        username: "Reset application data",
+        notes: "Clear all passwords and reset application (requires restart)",
+        createdAt: "",
+        updatedAt: "",
+    },
 ];
 
 interface MainScreenProps {
