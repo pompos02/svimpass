@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	"svimpass/internal/paths"
 	"svimpass/internal/services"
 )
 
 // ParseCommand parses user input into executable commands
-func ParseCommand(input string, passwordSvc *services.PasswordService) (Command, error) {
+func ParseCommand(input string, passwordSvc *services.PasswordService, paths *paths.Paths) (Command, error) {
 	input = strings.TrimSpace(input)
 
 	// Remove the : prefix
@@ -36,6 +37,8 @@ func ParseCommand(input string, passwordSvc *services.PasswordService) (Command,
 		return parseImportCommand(args, passwordSvc)
 	case "export":
 		return parseExportCommand(passwordSvc)
+	case "reset!":
+		return ParseResetCommand(paths)
 
 	default:
 		return nil, fmt.Errorf("unknown command: %s", command)
@@ -120,4 +123,8 @@ func parseImportCommand(args string, passwordSvc *services.PasswordService) (Com
 
 func parseExportCommand(passwordSvc *services.PasswordService) (Command, error) {
 	return &ExportCommand{PasswordService: passwordSvc}, nil
+}
+
+func ParseResetCommand(paths *paths.Paths) (Command, error) {
+	return &ResetApp{Paths: paths}, nil
 }

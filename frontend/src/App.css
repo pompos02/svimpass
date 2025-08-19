@@ -289,9 +289,9 @@ body {
   background: var(--rp-surface-highlight);
 }
 
-.dropdown-item.selected {
-  border-left: 4px solid var(--rp-iris);
-}
+/* .dropdown-item.selected { */
+/*   border-left: 4px solid var(--rp-iris); */
+/* } */
 
 .entry-main {
   flex: 1;
@@ -527,11 +527,6 @@ body {
   background: var(--rp-overlay);
 }
 
-.spotlight-dropdown .dropdown-item.selected {
-  background: var(--rp-iris);
-  color: var(--rp-base);
-}
-
 .spotlight-dropdown .entry-main {
   flex: 1;
   min-width: 0;
@@ -551,10 +546,7 @@ body {
   line-height: 1.2;
 }
 
-.spotlight-dropdown .dropdown-item.selected .created-date,
-.spotlight-dropdown .dropdown-item.selected .updated-date {
-  color: rgba(25, 23, 36, 0.6);
-}
+
 
 .spotlight-dropdown .service-name {
   font-weight: 600;
@@ -563,6 +555,11 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: var(--rp-text);
+}
+
+.spotlight-dropdown .dropdown-item.selected .service-name {
+  font-weight: 700;
   color: var(--rp-text);
 }
 
@@ -576,7 +573,21 @@ body {
 }
 
 .spotlight-dropdown .dropdown-item.selected .username {
-  color: rgba(25, 23, 36, 0.8);
+  color: var(--rp-subtle);
+  font-weight: 700;
+}
+
+.spotlight-dropdown .notes {
+  color: var(--rp-muted);
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spotlight-dropdown .dropdown-item.selected .notes {
+  color: var(--rp-muted);
+  font-weight: 700;
 }
 
 .spotlight-dropdown .entry-actions {
@@ -586,8 +597,7 @@ body {
   align-items: center;
 }
 
-.spotlight-dropdown .copy-hint,
-.spotlight-dropdown .delete-hint {
+.spotlight-dropdown .copy-hint {
   font-size: 11px;
   color: var(--rp-muted);
   background: var(--rp-overlay);
@@ -596,21 +606,13 @@ body {
   font-weight: 500;
 }
 
-.spotlight-dropdown .dropdown-item.selected .copy-hint,
-.spotlight-dropdown .dropdown-item.selected .delete-hint {
-  background: rgba(25, 23, 36, 0.2);
-  color: var(--rp-base);
+.spotlight-dropdown .dropdown-item.selected .copy-hint {
+  background: var(--rp-overlay);
+  color: var(--rp-muted);
+  font-weight: 700;
 }
 
-.spotlight-dropdown .delete-hint {
-  color: var(--rp-love);
-  background: rgba(235, 111, 146, 0.1);
-}
 
-.spotlight-dropdown .dropdown-item.selected .delete-hint {
-  background: rgba(25, 23, 36, 0.2);
-  color: var(--rp-base);
-}
 
 .more-results-indicator {
   padding: 8px 20px;

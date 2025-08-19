@@ -97,15 +97,11 @@ export default function PasswordDropdown({
             </div>
             
             <div className="entry-details">
-              <div className="created-date">Created: {formatDate(entry.createdAt)}</div>
-              <div className="updated-date">Updated: {formatDate(entry.updatedAt)}</div>
+              <div className="notes">{entry.notes || ''}</div>
             </div>
             
             <div className="entry-actions">
               <span className="copy-hint">↵</span>
-              {index === navigation.selectedIndex && (
-                <span className="delete-hint">⌫</span>
-              )}
             </div>
           </div>
         ))}

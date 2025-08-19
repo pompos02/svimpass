@@ -257,7 +257,7 @@ func (a *App) TestConnection() string {
 
 // ExecuteCommand parses and executes user commands
 func (a *App) ExecuteCommand(input string) (any, error) {
-	cmd, err := commands.ParseCommand(input, a.passwordSvc)
+	cmd, err := commands.ParseCommand(input, a.passwordSvc, a.paths)
 	if err != nil {
 		return nil, err
 	}

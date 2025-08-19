@@ -3,7 +3,9 @@ package commands
 
 import (
 	"context"
+	"fmt"
 
+	"svimpass/internal/paths"
 	"svimpass/internal/services"
 )
 
@@ -58,4 +60,16 @@ type ExportCommand struct {
 
 func (c *ExportCommand) Execute(ctx context.Context) (any, error) {
 	return nil, c.PasswordService.ExportPasswordToCSV()
+}
+
+type ResetApp struct {
+	Paths *paths.Paths
+}
+
+func (c *ResetApp) Execute(ctx context.Context) (any, error) {
+	err := c.Paths.ResetAll()
+	if err != nil {
+		return nil, fmt.Errorf("error cleaning the files with error %w", err)
+	}
+	return "Succesfull application reset, restart the application", nil
 }

@@ -454,6 +454,9 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
                 } else if (lowerInput.startsWith(":export")) {
                     showMessage("Export completed successfully");
                 } else {
+                    if (result && typeof result === "string") {
+                        showMessage(result);
+                    }
                     setInput("");
                 }
             } catch (error) {

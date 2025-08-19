@@ -1,6 +1,7 @@
 package paths
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -61,10 +62,10 @@ func (p *Paths) EnsureDirectories() error {
 		path string
 		perm os.FileMode
 	}{
-		{p.DataDir, 0700},    // User only - contains sensitive database
-		{p.ConfigDir, 0700},  // User only - contains master password config
-		{p.RuntimeDir, 0700}, // User only - contains socket
-		{p.BackupDir(), 0700}, // User only - contains database backups
+		{p.DataDir, 0o700},     // User only - contains sensitive database
+		{p.ConfigDir, 0o700},   // User only - contains master password config
+		{p.RuntimeDir, 0o700},  // User only - contains socket
+		{p.BackupDir(), 0o700}, // User only - contains database backups
 	}
 
 	for _, dir := range directories {
@@ -84,7 +85,7 @@ func getXDGDataDir(homeDir string) string {
 	return filepath.Join(homeDir, ".local", "share", appName)
 }
 
-// getXDGConfigDir returns XDG_CONFIG_HOME/appName or ~/.config/appName  
+// getXDGConfigDir returns XDG_CONFIG_HOME/appName or ~/.config/appName
 func getXDGConfigDir(homeDir string) string {
 	if configHome := os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
 		return filepath.Join(configHome, appName)
@@ -115,5 +116,35 @@ func (p *Paths) Cleanup() error {
 		os.Remove(p.RuntimeDir)
 	}
 
+	return nil
+}
+
+func (p *Paths) ResetAll() error {
+	files := []string{
+		p.Database(),
+		p.Config(),
+		p.Socket(),
+	}
+
+	for _, file := range files {
+		err := os.Remove(file)
+		if err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("error deleting file %s with error %w", file, err)
+		}
+	}
+
+	directories := []string{
+		p.BackupDir(), // ~/.local/share/svimpass/backups
+		p.RuntimeDir,  // runtime directory
+		p.ConfigDir,   // ~/.config/svimpass
+		p.DataDir,     // ~/.local/share/svimpass
+	}
+
+	for _, dir := range directories {
+		err := os.RemoveAll(dir)
+		if err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("error deleting direcotry  %s with error %w", dir, err)
+		}
+	}
 	return nil
 }
