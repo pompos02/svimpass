@@ -98,6 +98,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [placeholder, setPlaceholder] = useState("");
     const [isShowingMessage, setIsShowingMessage] = useState(false);
+    const [currentWindowState, setCurrentWindowState] = useState<'collapsed' | 'expanded'>('collapsed');
     const [passwordEntryState, setPasswordEntryState] =
         useState<PasswordEntryState>({
             isActive: false,
@@ -244,6 +245,24 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         }
     }, [passwordEntryState.isActive]);
 
+    // Helper function to conditionally resize window only when state changes
+    const conditionalWindowResize = async (shouldExpand: boolean) => {
+        const targetState = shouldExpand ? 'expanded' : 'collapsed';
+        
+        if (currentWindowState !== targetState) {
+            try {
+                if (shouldExpand) {
+                    await SetWindowExpanded();
+                } else {
+                    await SetWindowCollapsed();
+                }
+                setCurrentWindowState(targetState);
+            } catch (error) {
+                console.error("Failed to resize window:", error);
+            }
+        }
+    };
+
     const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setInput(value);
@@ -264,11 +283,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
             setResults([]);
             navigation.reset();
             // Collapse window when no input
-            try {
-                await SetWindowCollapsed();
-            } catch (error) {
-                console.error("Failed to collapse window:", error);
-            }
+            await conditionalWindowResize(false);
             return;
         }
 
@@ -278,11 +293,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
             setShowDropdown(true);
             navigation.reset();
             // Expand window to show help
-            try {
-                await SetWindowExpanded();
-            } catch (error) {
-                console.error("Failed to expand window:", error);
-            }
+            await conditionalWindowResize(true);
             return;
         }
 
@@ -296,15 +307,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
                 setShowDropdown(hasResults);
 
                 // Resize window based on results
-                try {
-                    if (hasResults) {
-                        await SetWindowExpanded();
-                    } else {
-                        await SetWindowCollapsed();
-                    }
-                } catch (error) {
-                    console.error("Failed to resize window:", error);
-                }
+                await conditionalWindowResize(hasResults);
 
                 // Don't reset navigation here - let user continue with existing selection
             } catch (error) {
@@ -313,11 +316,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
                 setShowDropdown(false);
                 navigation.reset();
                 // Collapse window on error
-                try {
-                    await SetWindowCollapsed();
-                } catch (resizeError) {
-                    console.error("Failed to collapse window:", resizeError);
-                }
+                await conditionalWindowResize(false);
             } finally {
                 setIsLoading(false);
             }
@@ -327,11 +326,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
             setResults([]);
             navigation.reset();
             // Collapse window in command mode
-            try {
-                await SetWindowCollapsed();
-            } catch (error) {
-                console.error("Failed to collapse window:", error);
-            }
+            await conditionalWindowResize(false);
         }
     };
 
