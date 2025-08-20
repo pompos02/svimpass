@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"runtime"
+	"time"
 
 	"svimpass/internal/commands"
 	"svimpass/internal/crypto"
@@ -12,7 +15,7 @@ import (
 	"svimpass/internal/paths"
 	"svimpass/internal/services"
 
-	"github.com/getlantern/systray"
+	"github.com/energye/systray"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -81,42 +84,99 @@ func (a *App) OnShutdown(ctx context.Context) {
 	}
 }
 
-// initTray initializes the system tray icon and menu
+// initTray initializes the system tray icon and menu with fallback handling
 func (a *App) initTray() {
-	systray.Run(func() {
-		// Load icon from assets
-		iconData, err := ioutil.ReadFile("frontend/src/assets/images/logo-universal.png")
-		if err != nil {
-			fmt.Printf("Failed to load tray icon: %v\n", err)
-			systray.SetIcon([]byte{}) // Use default icon as fallback
-		} else {
-			systray.SetIcon(iconData)
+	// Check if system tray should be disabled
+	if os.Getenv("DISABLE_SYSTEM_TRAY") == "1" {
+		fmt.Println("System tray disabled via DISABLE_SYSTEM_TRAY environment variable")
+		fmt.Println("You can still use the application with the --toggle flag or global hotkeys")
+		return
+	}
+
+	// On Linux, disable system tray by default due to libayatana-appindicator issues
+	// Users can enable it with ENABLE_SYSTEM_TRAY=1 if they have proper setup
+	if runtime.GOOS == "linux" && os.Getenv("ENABLE_SYSTEM_TRAY") != "1" {
+		fmt.Println("System tray disabled on Linux by default due to compatibility issues")
+		fmt.Println("Set ENABLE_SYSTEM_TRAY=1 to force enable system tray (may cause crashes)")
+		fmt.Println("You can still use the application with the --toggle flag or global hotkeys")
+		return
+	}
+
+	// Try to initialize system tray in a goroutine with error handling
+	go a.tryInitTray()
+}
+
+// tryInitTray attempts to initialize the system tray with proper error handling
+func (a *App) tryInitTray() {
+	// Check if we're on Linux and provide a warning about potential issues
+	if runtime.GOOS == "linux" {
+		fmt.Println("Note: System tray functionality may not work properly on some Linux distributions")
+		fmt.Println("This is due to deprecated libayatana-appindicator library issues")
+		fmt.Println("The application will continue without system tray functionality")
+	}
+
+	// Try to initialize system tray with error handling
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("System tray initialization failed (this is normal on some Linux systems): %v\n", r)
+			fmt.Println("Application will continue without system tray functionality")
+			fmt.Println("You can still use the application with the --toggle flag or global hotkeys")
 		}
+	}()
 
-		systray.SetTitle("Svimpass")
-		systray.SetTooltip("Svimpass Password Manager")
+	// Set environment variables to help with deprecated libayatana-appindicator
+	os.Setenv("GDK_BACKEND", "x11")
+	os.Setenv("XDG_CURRENT_DESKTOP", "XFCE")
 
-		// Create menu items
-		mShow := systray.AddMenuItem("Show", "Show password manager")
-		mHide := systray.AddMenuItem("Hide", "Hide password manager")
-		systray.AddSeparator()
-		mQuit := systray.AddMenuItem("Quit", "Quit application")
-
-		// Handle menu clicks
-		go func() {
-			for {
-				select {
-				case <-mShow.ClickedCh:
-					a.ShowSpotlight()
-				case <-mHide.ClickedCh:
-					a.HideSpotlight()
-				case <-mQuit.ClickedCh:
-					systray.Quit()
-					wailsruntime.Quit(a.ctx)
-				}
+	// Try to run systray with a timeout mechanism
+	done := make(chan bool)
+	go func() {
+		defer close(done)
+		systray.Run(func() {
+			// Load icon from assets
+			iconData, err := ioutil.ReadFile("frontend/src/assets/images/logo-universal.png")
+			if err != nil {
+				fmt.Printf("Failed to load tray icon: %v\n", err)
+				systray.SetIcon([]byte{}) // Use default icon as fallback
+			} else {
+				systray.SetIcon(iconData)
 			}
-		}()
-	}, nil)
+
+			systray.SetTitle("Svimpass")
+			systray.SetTooltip("Svimpass Password Manager")
+
+			// Create menu items
+			mShow := systray.AddMenuItem("Show", "Show password manager")
+			mHide := systray.AddMenuItem("Hide", "Hide password manager")
+			systray.AddSeparator()
+			mQuit := systray.AddMenuItem("Quit", "Quit application")
+
+			// Register click handlers
+			mShow.Click(func() {
+				a.ShowSpotlight()
+			})
+			mHide.Click(func() {
+				a.HideSpotlight()
+			})
+			mQuit.Click(func() {
+				systray.Quit()
+				wailsruntime.Quit(a.ctx)
+			})
+		}, func() {
+			// Cleanup function - called when systray stops
+			fmt.Println("System tray stopped")
+		})
+	}()
+
+	// Wait a bit to see if systray starts successfully
+	select {
+	case <-done:
+		// systray finished immediately (likely due to error)
+		fmt.Println("System tray initialization completed")
+	case <-time.After(2 * time.Second):
+		// systray seems to be running fine
+		fmt.Println("System tray initialized successfully")
+	}
 }
 
 // onBeforeClose is called before the window closes
