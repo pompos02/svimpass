@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"runtime"
 	"time"
 
 	"svimpass/internal/commands"
@@ -93,40 +92,20 @@ func (a *App) initTray() {
 		return
 	}
 
-	// On Linux, disable system tray by default due to libayatana-appindicator issues
-	// Users can enable it with ENABLE_SYSTEM_TRAY=1 if they have proper setup
-	if runtime.GOOS == "linux" && os.Getenv("ENABLE_SYSTEM_TRAY") != "1" {
-		fmt.Println("System tray disabled on Linux by default due to compatibility issues")
-		fmt.Println("Set ENABLE_SYSTEM_TRAY=1 to force enable system tray (may cause crashes)")
-		fmt.Println("You can still use the application with the --toggle flag or global hotkeys")
-		return
-	}
-
 	// Try to initialize system tray in a goroutine with error handling
 	go a.tryInitTray()
 }
 
 // tryInitTray attempts to initialize the system tray with proper error handling
 func (a *App) tryInitTray() {
-	// Check if we're on Linux and provide a warning about potential issues
-	if runtime.GOOS == "linux" {
-		fmt.Println("Note: System tray functionality may not work properly on some Linux distributions")
-		fmt.Println("This is due to deprecated libayatana-appindicator library issues")
-		fmt.Println("The application will continue without system tray functionality")
-	}
-
 	// Try to initialize system tray with error handling
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("System tray initialization failed (this is normal on some Linux systems): %v\n", r)
+			fmt.Printf("System tray initialization failed: %v\n", r)
 			fmt.Println("Application will continue without system tray functionality")
 			fmt.Println("You can still use the application with the --toggle flag or global hotkeys")
 		}
 	}()
-
-	// Set environment variables to help with deprecated libayatana-appindicator
-	os.Setenv("GDK_BACKEND", "x11")
-	os.Setenv("XDG_CURRENT_DESKTOP", "XFCE")
 
 	// Try to run systray with a timeout mechanism
 	done := make(chan bool)
