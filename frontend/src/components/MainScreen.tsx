@@ -566,9 +566,9 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
 
             if (e.key === "Enter") {
                 e.preventDefault();
-                if (showDropdown && navigation.selectedItem) {
+                if (showDropdown && navigation.selectedItem && !isHelpMode()) {
                     navigation.selectCurrent();
-                } else if (document.activeElement === inputRef.current) {
+                } else if (document.activeElement === inputRef.current && !isHelpMode()) {
                     await handleSubmit();
                 }
                 return;
@@ -601,12 +601,22 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
                     }
                 }
                 // Delete selected item
-                else if (e.key === "d" && e.ctrlKey && navigation.selectedItem) {
+                else if (
+                    e.key === "d" &&
+                    e.ctrlKey &&
+                    navigation.selectedItem &&
+                    !isHelpMode()
+                ) {
                     e.preventDefault();
                     await handleDelete(navigation.selectedItem.id);
                 }
                 // Edit selected item
-                else if (e.key === "e" && e.ctrlKey && navigation.selectedItem) {
+                else if (
+                    e.key === "e" &&
+                    e.ctrlKey &&
+                    navigation.selectedItem &&
+                    !isHelpMode()
+                ) {
                     e.preventDefault();
                     await handleEdit(navigation.selectedItem.id);
                 }

@@ -20,15 +20,6 @@ export default function PasswordDropdown({
 }: PasswordDropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString();
-    } catch {
-      return dateString;
-    }
-  };
-
   // Auto-scroll selected item into view with precise one-entry movement
   useEffect(() => {
     if (navigation.selectedIndex >= 0 && dropdownRef.current) {

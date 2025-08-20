@@ -24,20 +24,11 @@ cd frontend && npm install && cd ..
 
 #### Platform-Specific Development Builds
 
-````bash
+```bash
 # Build for your current platform
 make build-linux    # Linux (no global hotkeys)
 make build-windows  # Windows (with global hotkeys)
 make build-darwin   # macOS (with global hotkeys)
-
-
-#### Running Tests
-```bash
-# Go backend tests
-go test ./...
-
-# Note: Frontend tests not yet implemented
-````
 
 ## Project Architecture
 
@@ -52,64 +43,61 @@ svimpass uses the **Wails v2 framework** which combines:
 ### Data Flow
 
 ```
+
 Frontend → App (app.go) → Services → Database
-                    ↓
-              Commands → Parser → Execution
+↓
+Commands → Parser → Execution
+
 ```
 
 ### Backend Architecture
 
 ```
+
 internal/
-├── commands/         # Command parser and execution system
-│   ├── commands.go   # Command implementations (Add, Import, Export, Reset)
-│   ├── interface.go  # Command interface definition
-│   └── parser.go     # Command parsing logic
-├── crypto/           # Encryption and master password management
-│   ├── encryption.go # AES-256-GCM encryption/decryption
-│   └── master.go     # PBKDF2 key derivation, master password handling
-├── database/         # SQLite ORM and models
-│   ├── db.go         # Database connection, CRUD operations
-│   └── models.go     # PasswordEntry struct, request types
-├── hotkey/           # Platform-specific global shortcuts
-│   ├── interface.go          # Common hotkey interface
-│   ├── manager_linux.go      # Linux implementation (no-op)
-│   ├── manager_windows.go    # Windows hotkey implementation
-│   └── manager_darwin.go     # macOS hotkey implementation
-├── paths/            # XDG-compliant file organization
-│   └── paths.go      # Config, data, cache directory management
-├── services/         # Business logic layer
-│   ├── auth.go       # Authentication service (login/unlock)
-│   ├── password.go   # Password service (CRUD, generation)
-│   └── types.go      # Service request/response types
-├── csv/              # Import/export functionality
-│   ├── exporter.go   # CSV export logic
-│   └── importer.go   # CSV import with validation
-└── generator/        # Secure password generation
-    └── generator.go  # Cryptographically secure random passwords
+├── commands/ # Command parser and execution system
+│ ├── commands.go # Command implementations (Add, Import, Export, Reset)
+│ ├── interface.go # Command interface definition
+│ └── parser.go # Command parsing logic
+├── crypto/ # Encryption and master password management
+│ ├── encryption.go # AES-256-GCM encryption/decryption
+│ └── master.go # PBKDF2 key derivation, master password handling
+├── database/ # SQLite ORM and models
+│ ├── db.go # Database connection, CRUD operations
+│ └── models.go # PasswordEntry struct, request types
+├── hotkey/ # Platform-specific global shortcuts
+│ ├── interface.go # Common hotkey interface
+│ ├── manager_linux.go # Linux implementation (no-op)
+│ ├── manager_windows.go # Windows hotkey implementation
+│ └── manager_darwin.go # macOS hotkey implementation
+├── paths/ # XDG-compliant file organization
+│ └── paths.go # Config, data, cache directory management
+├── services/ # Business logic layer
+│ ├── auth.go # Authentication service (login/unlock)
+│ ├── password.go # Password service (CRUD, generation)
+│ └── types.go # Service request/response types
+├── csv/ # Import/export functionality
+│ ├── exporter.go # CSV export logic
+│ └── importer.go # CSV import with validation
+└── generator/ # Secure password generation
+└── generator.go # Cryptographically secure random passwords
+
 ```
 
 ### Frontend Architecture
 
 ```
+
 frontend/src/
 ├── components/
-│   ├── LoginScreen.tsx      # Master password entry
-│   ├── MainScreen.tsx       # Main application interface
-│   └── PasswordDropdown.tsx # Search results display
+│ ├── LoginScreen.tsx # Master password entry
+│ ├── MainScreen.tsx # Main application interface
+│ └── PasswordDropdown.tsx # Search results display
 ├── hooks/
-│   └── useSimpleNavigation.ts # Keyboard navigation logic
-├── assets/           # Static resources (fonts, images)
-├── types.ts          # TypeScript type definitions
-└── main.tsx          # Application entry point
-```
-
-**Key Frontend Patterns:**
-
-- **Functional components** with React hooks
-- **TypeScript strict mode** for type safety
-- **Wails bindings** for backend communication
-- **Event-driven architecture** for window management
+│ └── useSimpleNavigation.ts # Keyboard navigation logic
+├── assets/ # Static resources (fonts, images)
+├── types.ts # TypeScript type definitions
+└── main.tsx # Application entry point
 
 ### Security Architecture
 
@@ -133,52 +121,6 @@ frontend/src/
 
 ## Code Organization and Standards
 
-### Go Backend Standards
-
-#### Code Style
-
-```go
-// Use standard Go formatting
-go fmt ./...
-
-// Package comments start with package name
-// Package database handles all database operations
-package database
-
-// Struct fields: PascalCase with JSON tags in camelCase
-type PasswordEntry struct {
-    ID                int       `db:"id" json:"id"`
-    ServiceName       string    `db:"service_name" json:"serviceName"`
-    Username          string    `db:"username" json:"username"`
-    EncryptedPassword []byte    `db:"encrypted_password" json:"-"`
-    CreatedAt         time.Time `db:"created_at" json:"createdAt"`
-}
-```
-
-#### Error Handling
-
-```go
-// Return errors, don't panic
-func (s *PasswordService) CreatePassword(req CreatePasswordRequest) error {
-    if req.ServiceName == "" {
-        return fmt.Errorf("service name is required")
-    }
-
-    // Wrap errors with context
-    if err := s.db.CreatePasswordEntry(entry); err != nil {
-        return fmt.Errorf("failed to create password entry: %w", err)
-    }
-
-    return nil
-}
-```
-
-#### Database Models
-
-- All models in `internal/database/models.go`
-- Use struct tags for both database and JSON serialization
-- Implement proper validation in service layer
-
 #### Type Definitions
 
 ```typescript
@@ -192,18 +134,6 @@ interface LocalPasswordEntry extends services.PasswordEntryResponse {
 }
 ```
 
-### Build System
-
-#### Makefile Targets
-
-- `make help` - Show all available commands
-- `make dev` - Start development mode
-- `make test` - Run all tests
-- `make build-linux` - Linux build (excludes hotkey dependencies)
-- `make build-windows` - Windows build (includes hotkeys)
-- `make build-darwin` - macOS build (includes hotkeys)
-- `make clean` - Clean build artifacts
-
 #### Platform-Specific Builds
 
 The build system handles conditional compilation for global hotkey support:
@@ -211,7 +141,7 @@ The build system handles conditional compilation for global hotkey support:
 **Linux Build (`scripts/build-linux.sh`)**:
 
 ```bash
-# Removes hotkey dependencies from go.mod temporarily as i had problems with this dependency in my wayland based env
+# Removes hotkey dependencies from go.mod temporarily as i had problems with this dependency in my wayland based env (bind a hotkey with the --toggle flag)
 sed '/golang.design\/x\/hotkey/d' go.mod > go.mod.tmp && mv go.mod.tmp go.mod
 GOOS=linux GOARCH=amd64 wails build -tags "desktop,production,linux"
 ```
@@ -271,29 +201,6 @@ make ....
 - Follow the coding standards above
 - Add tests for new functionality
 - Update documentation if needed
-
-### 5. Test Your Changes
-
-```bash
-# Run Go tests
-go test ./...
-
-# Test builds for your platform
-make build-linux   # or build-windows/build-darwin
-
-# Test the built binary
-./build/bin/svimpass
-```
-
-### 6. Commit and Push
-
-```bash
-git add .
-git commit -m "feat: add new feature description"
-git push origin feature/your-feature-name
-```
-
-### 7. Create Pull Request
 
 ## API Reference
 
@@ -399,13 +306,11 @@ CREATE INDEX idx_username ON password_entries(username);
 #### Window Not Showing on Linux
 
 - **Cause**: X11 display issues or window manager compatibility
-- **Solution**: Check DISPLAY environment variable, test with different WM
+- **Solution**: Check DISPLAY environment variable, test with different WM,
 
 #### Permission Errors on macOS
 
 - **Cause**: Gatekeeper or missing Accessibility permissions
 - **Solution**: Allow app in System Preferences, grant Accessibility permissions
-
-## Project Roadmap and Needs
 
 Thank you for contributing to svimpass!

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 
 	"svimpass/internal/commands"
 	"svimpass/internal/crypto"
@@ -11,6 +12,7 @@ import (
 	"svimpass/internal/paths"
 	"svimpass/internal/services"
 
+	"github.com/getlantern/systray"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -61,6 +63,10 @@ func (a *App) startup(ctx context.Context) {
 	} else {
 		fmt.Printf("Hotkey manager started: %s\n", a.hotkeyManager.GetDescription())
 	}
+
+	// Initialize system tray
+	go a.initTray()
+
 }
 
 func (a *App) OnShutdown(ctx context.Context) {
@@ -73,6 +79,44 @@ func (a *App) OnShutdown(ctx context.Context) {
 	if a.db != nil {
 		a.db.Close()
 	}
+}
+
+// initTray initializes the system tray icon and menu
+func (a *App) initTray() {
+	systray.Run(func() {
+		// Load icon from assets
+		iconData, err := ioutil.ReadFile("frontend/src/assets/images/logo-universal.png")
+		if err != nil {
+			fmt.Printf("Failed to load tray icon: %v\n", err)
+			systray.SetIcon([]byte{}) // Use default icon as fallback
+		} else {
+			systray.SetIcon(iconData)
+		}
+
+		systray.SetTitle("Svimpass")
+		systray.SetTooltip("Svimpass Password Manager")
+
+		// Create menu items
+		mShow := systray.AddMenuItem("Show", "Show password manager")
+		mHide := systray.AddMenuItem("Hide", "Hide password manager")
+		systray.AddSeparator()
+		mQuit := systray.AddMenuItem("Quit", "Quit application")
+
+		// Handle menu clicks
+		go func() {
+			for {
+				select {
+				case <-mShow.ClickedCh:
+					a.ShowSpotlight()
+				case <-mHide.ClickedCh:
+					a.HideSpotlight()
+				case <-mQuit.ClickedCh:
+					systray.Quit()
+					wailsruntime.Quit(a.ctx)
+				}
+			}
+		}()
+	}, nil)
 }
 
 // onBeforeClose is called before the window closes

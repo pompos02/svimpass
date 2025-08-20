@@ -1,18 +1,22 @@
 # Makefile for svimpass - Cross-platform builds with conditional hotkey support
 
-.PHONY: help build-linux build-windows build-darwin build-all clean test dev
+.PHONY: help install-wails build-linux build-windows build-darwin clean dev
 
 # Default target
 help:
 	@echo "Available targets:"
+	@echo "  install-wails  - Install Wails CLI (required for building)"
 	@echo "  build-linux    - Build for Linux (no global hotkey dependency)"
 	@echo "  build-windows  - Build for Windows (with global hotkey support)"
 	@echo "  build-darwin   - Build for macOS (with global hotkey support)"
-	@echo "  build-all      - Build for all platforms"
 	@echo "  clean          - Clean build artifacts"
-	@echo "  test          - Run tests"
-	@echo "  dev           - Start development mode"
 	@echo "  help          - Show this help message"
+
+# Install Wails CLI
+install-wails:
+	@echo "Installing Wails CLI..."
+	@go install github.com/wailsapp/wails/v2/cmd/wails@latest
+	@echo "Wails CLI installed successfully. Make sure $(shell go env GOPATH)/bin is in your PATH."
 
 # Linux build - excludes hotkey dependency
 build-linux:
@@ -29,9 +33,6 @@ build-darwin:
 	@echo "Building for macOS..."
 	@./scripts/build-darwin.sh
 
-# Build for all platforms
-build-all: build-linux build-windows build-darwin
-	@echo "All platform builds completed!"
 
 # Clean build artifacts
 clean:
@@ -39,10 +40,6 @@ clean:
 	@rm -rf build/bin/*
 	@echo "Build artifacts cleaned."
 
-# Run tests
-test:
-	@echo "Running tests..."
-	@go test ./...
 
 # Development mode
 dev:

@@ -31,28 +31,57 @@ func (m *windowsManager) Start(toggleCallback func()) error {
 
 	m.toggleCallback = toggleCallback
 
-	// Register Ctrl+Shift+P hotkey combination using pure register pattern
-	hook.Register(hook.KeyDown, []string{"p", "ctrl", "shift"}, func(e hook.Event) {
-		fmt.Println("🔥 Hotkey Ctrl+Shift+P triggered!") // Debug logging
-		if m.toggleCallback != nil {
-			fmt.Println("🔄 Calling toggle callback...")
-			m.toggleCallback()
-		} else {
-			fmt.Println("❌ Toggle callback is nil!")
-		}
-	})
+	// Start the hook event system and capture the channel for raw processing
+	evChan := hook.Start()
 
-	// Start the hook event system - no manual event processing needed
-	hook.Start()
+	if evChan == nil {
+		return fmt.Errorf("failed to start hook system")
+	}
+
 	m.enabled = true
 	m.isRunning = true
 
-	fmt.Println("Global hotkey registered: Ctrl+Shift+P")
+	fmt.Println("Global hotkey system started: Ctrl+Shift+P")
 
-	// Simple background goroutine to handle stop signal
+	// Process raw events and manually detect Ctrl+Shift+P
 	go func() {
-		<-m.stop
-		fmt.Println("Hotkey manager stopping...")
+		// Track modifier states
+		ctrlPressed := false
+		shiftPressed := false
+
+		for {
+			select {
+			case ev, ok := <-evChan:
+				if !ok {
+					fmt.Println("Event channel closed!")
+					return
+				}
+
+				// Windows modifier masks (different from macOS)
+				// Ctrl = mask & 0x0008 (left) or mask & 0x0004 (right)
+				// Shift = mask & 0x0001 (left) or mask & 0x0002 (right)
+				ctrlPressed = (ev.Mask&0x0008) != 0 || (ev.Mask&0x0004) != 0
+				shiftPressed = (ev.Mask&0x0001) != 0 || (ev.Mask&0x0002) != 0
+
+				// Check for Ctrl+Shift+P combination
+				if ctrlPressed && shiftPressed {
+					// Check KeyDown events (Kind=4) with keycode for P key
+					// Windows P key typically has keycode 80 or virtual key code 0x50
+					if ev.Kind == 4 && (ev.Keycode == 80 || ev.Keycode == 0x50 || ev.Rawcode == 0x50) {
+						fmt.Println("🔥 CTRL+SHIFT+P DETECTED on Windows!")
+						if m.toggleCallback != nil {
+							fmt.Println("🔄 Calling toggle callback...")
+							m.toggleCallback()
+						} else {
+							fmt.Println("❌ Toggle callback is nil!")
+						}
+					}
+				}
+			case <-m.stop:
+				fmt.Println("Event processor stopping...")
+				return
+			}
+		}
 	}()
 
 	return nil

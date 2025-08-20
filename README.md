@@ -9,10 +9,9 @@ svimpass is a cross-platform desktop password manager that provides a clean, spo
 ### Key Features
 
 - **Encrypted Storage**: AES-256-GCM encryption with PBKDF2 key derivation
-- **Global Hotkeys**: Quick access via system-wide shortcuts (Windows/macOS only)
+- **Global Hotkeys**: Quick access via system-wide shortcuts
 - **CSV Import/Export**: Bulk password management with standard CSV format
 - **Command System**: Built-in commands for password operations
-- **Cross-platform**: Native builds for Linux, Windows, and macOS
 - **Spotlight Interface**: Minimal, keyboard-driven design for efficiency
 
 ## Technology Stack
@@ -24,47 +23,88 @@ svimpass is a cross-platform desktop password manager that provides a clean, spo
 
 ## Prerequisites
 
-- **Go 1.23+**
-- **Node.js 16+**
-- **Wails CLI v2**: Install with `go install github.com/wailsapp/wails/v2/cmd/wails@latest`
+Before building svimpass, you need to install the required dependencies. Follow the instructions below for your operating system.
+
+### 1. Install Go (1.23+)
+
+```bash
+# Download and install Go 1.23+
+
+# Add Go to PATH (add to ~/.bashrc or ~/.profile)
+echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+source ~/.bashrc
+
+# Verify installation
+go version
+```
+
+### 2. Install Node.js (16+)
+
+### 3. Install Wails CLI v2
+
+Once Go is installed, install the Wails CLI:
+
+```bash
+go install github.com/wailsapp/wails/v2/cmd/wails@latest
+```
+
+Verify Wails installation:
+
+```bash
+wails version
+wails doctor
+```
+
+### 4. Install GCC Compiler
+
+GCC (GNU Compiler Collection) is required for building Go applications with CGO dependencies.
 
 ## Installation
+
+### Build from Source
 
 ### Pre-built Binaries
 
 Download the latest release for your platform from the [releases page](https://github.com/pompos02/svimpass/releases).
 
-### Build from Source
+1. **Clone the repository**:
 
-#### Linux Build
+   ```bash
+   git clone https://github.com/pompos02/svimpass
+   cd svimpass
+   ```
 
-```bash
-git clone https://github.com/pompos02/svimpass
-cd svimpass
-make build-linux
-```
+2. **Install Wails CLI** (if not already installed):
 
-#### Windows Build
+   ```bash
+   make install-wails
+   ```
 
-```bash
-git clone https://github.com/pompos02/svimpass
-cd svimpass
-make build-windows
-```
+   Alternatively, install manually:
 
-#### macOS Build
+   ```bash
+   go install github.com/wailsapp/wails/v2/cmd/wails@latest
+   ```
 
-```bash
-git clone https://github.com/pompos02/svimpass
-cd svimpass
-make build-darwin
-```
+3. **Build for your platform**:
 
-#### All Platforms
+   #### Linux Build
 
-```bash
-make build-all
-```
+   ```bash
+   make build-linux
+   ```
+
+   #### Windows Build
+
+   ```bash
+   make build-windows
+   ```
+
+   #### macOS Build
+
+   ```bash
+   make build-darwin
+   ```
 
 Built binaries will be located in `build/bin/`.
 
@@ -137,52 +177,6 @@ GitHub,johndoe,gh_token_xyz,Development account
 - **Empty fields**: Entries with empty required fields are skipped during import
 - **Export location**: `~/Downloads/svimapassPasswords.csv`
 
-### Global Hotkeys
-
-#### Windows: `Ctrl+Alt+Space`
-
-- Toggles application visibility
-- Works from any application
-- Requires no additional setup
-
-#### macOS: `Ctrl+Shift+P`
-
-- Toggles application visibility
-- May require Accessibility permissions in System Preferences
-- Grant permissions when prompted on first use
-
-#### Linux: Not Supported
-
-- Use application menu or desktop integration
-- Advanced users can use socket/IPC for custom integrations
-- Consider `--toggle` flag for external activation scripts
-
-## Architecture
-
-### Backend Structure
-
-```
-internal/
-├── commands/     # Command parser and execution
-├── crypto/       # Encryption and master password management
-├── database/     # SQLite ORM and models
-├── hotkey/       # Platform-specific global shortcuts
-├── paths/        # XDG-compliant file organization
-├── services/     # Business logic layer
-├── csv/          # Import/export functionality
-└── generator/    # Secure password generation
-```
-
-### Frontend Structure
-
-```
-frontend/src/
-├── components/   # React components (LoginScreen, MainScreen, PasswordDropdown)
-├── hooks/        # Custom hooks (useSimpleNavigation)
-├── assets/       # Static resources
-└── types.ts      # TypeScript type definitions
-```
-
 ### Security Design
 
 - **Encryption**: AES-256-GCM with authenticated encryption
@@ -222,9 +216,10 @@ frontend/src/
 ### Build Failures
 
 - Verify Go 1.23+ and Node.js 16+ are installed
-- Install Wails CLI: `go install github.com/wailsapp/wails/v2/cmd/wails@latest`
+- Install Wails CLI: `make install-wails` or `go install github.com/wailsapp/wails/v2/cmd/wails@latest`
 - Run `go mod tidy` to ensure dependencies are correct
 - Check platform-specific build requirements in build scripts
+- Ensure `$(go env GOPATH)/bin` is in your PATH environment variable
 
 ## Contributing
 

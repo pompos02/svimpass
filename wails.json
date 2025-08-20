@@ -9,5 +9,11 @@
   "author": {
     "name": "pompos02",
     "email": "yiannis.caravellas@gmail.com"
+  },
+  "Info": {
+    "companyName": "pompos02",
+    "productName": "Svimpass",
+    "productVersion": "0.1.0",
+    "copyright": "Copyright........."
   }
 }
