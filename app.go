@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"os"
-	"time"
 
 	"svimpass/internal/commands"
 	"svimpass/internal/crypto"
@@ -83,40 +81,29 @@ func (a *App) OnShutdown(ctx context.Context) {
 	}
 }
 
-// initTray initializes the system tray icon and menu with fallback handling
+// initTray initializes the system tray icon and menu with automatic fallback
 func (a *App) initTray() {
-	// Check if system tray should be disabled
-	if os.Getenv("DISABLE_SYSTEM_TRAY") == "1" {
-		fmt.Println("System tray disabled via DISABLE_SYSTEM_TRAY environment variable")
-		fmt.Println("You can still use the application with the --toggle flag or global hotkeys")
-		return
-	}
-
-	// Try to initialize system tray in a goroutine with error handling
+	// Try to initialize system tray in a goroutine with automatic fallback
 	go a.tryInitTray()
 }
 
-// tryInitTray attempts to initialize the system tray with proper error handling
+// tryInitTray attempts to initialize the system tray with automatic fallback
 func (a *App) tryInitTray() {
-	// Try to initialize system tray with error handling
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("System tray initialization failed: %v\n", r)
-			fmt.Println("Application will continue without system tray functionality")
-			fmt.Println("You can still use the application with the --toggle flag or global hotkeys")
-		}
-	}()
-
-	// Try to run systray with a timeout mechanism
-	done := make(chan bool)
+	// Try to run systray - if it fails, the application continues without it
 	go func() {
-		defer close(done)
+		defer func() {
+			if r := recover(); r != nil {
+				// Silently continue without system tray
+				fmt.Println("System tray not available, continuing without it")
+			}
+		}()
+
 		systray.Run(func() {
 			// Load icon from assets
 			iconData, err := ioutil.ReadFile("frontend/src/assets/images/logo-universal.png")
 			if err != nil {
-				fmt.Printf("Failed to load tray icon: %v\n", err)
-				systray.SetIcon([]byte{}) // Use default icon as fallback
+				// Use default icon as fallback
+				systray.SetIcon([]byte{})
 			} else {
 				systray.SetIcon(iconData)
 			}
@@ -143,19 +130,8 @@ func (a *App) tryInitTray() {
 			})
 		}, func() {
 			// Cleanup function - called when systray stops
-			fmt.Println("System tray stopped")
 		})
 	}()
-
-	// Wait a bit to see if systray starts successfully
-	select {
-	case <-done:
-		// systray finished immediately (likely due to error)
-		fmt.Println("System tray initialization completed")
-	case <-time.After(2 * time.Second):
-		// systray seems to be running fine
-		fmt.Println("System tray initialized successfully")
-	}
 }
 
 // onBeforeClose is called before the window closes
