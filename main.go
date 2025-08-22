@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"runtime"
 
 	"svimpass/internal/paths"
 
@@ -44,7 +43,7 @@ func main() {
 
 	// Determine AlwaysOnTop setting based on platform
 	// Windows has focus issues with AlwaysOnTop when combined with Frameless
-	alwaysOnTop := runtime.GOOS != "windows"
+	// alwaysOnTop := runtime.GOOS != "windows"
 
 	// Create application with options
 	err = wails.Run(&options.App{
@@ -54,11 +53,11 @@ func main() {
 		MinWidth:      400,
 		MinHeight:     50,
 		MaxWidth:      800,
-		MaxHeight:     300,         // Allow expansion for dropdown
-		Frameless:     true,        // Remove window borders/title bar
-		StartHidden:   true,        // Start hidden for spotlight-like behavior
-		AlwaysOnTop:   alwaysOnTop, // Stay on top like Spotlight (except on Windows)
-		DisableResize: true,        // Prevent manual resize
+		MaxHeight:     300,  // Allow expansion for dropdown
+		Frameless:     true, // Remove window borders/title bar
+		StartHidden:   true, // Start hidden for spotlight-like behavior
+		AlwaysOnTop:   true, // Stay on top like Spotlight (except on Windows)
+		DisableResize: true, // Prevent manual resize
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

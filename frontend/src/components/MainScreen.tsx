@@ -19,14 +19,7 @@ import { EventsOn } from "../../wailsjs/runtime/runtime";
 
 const { CreatePasswordRequest } = services;
 
-// Simple debounce utility
-function debounce<T extends (...args: any[]) => any>(func: T, delay: number): T {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    return ((...args: any[]) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => func(...args), delay);
-    }) as T;
-}
+
 
 // Help commands data - formatted like PasswordEntry for component reuse
 const HELP_COMMANDS: PasswordEntry[] = [
@@ -272,13 +265,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
         }
     };
 
-    // Debounced version for search operations to prevent rapid resizing on Windows
-    const debouncedWindowResize = useCallback(
-        debounce(async (shouldExpand: boolean) => {
-            await conditionalWindowResize(shouldExpand);
-        }, 200),
-        [currentWindowState]
-    );
+
 
     const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -323,8 +310,8 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
                 const hasResults = searchResults && searchResults.length > 0;
                 setShowDropdown(hasResults);
 
-                // Use debounced resize to prevent rapid window operations on Windows
-                debouncedWindowResize(hasResults);
+                // Resize window immediately for responsive dropdown
+                await conditionalWindowResize(hasResults);
 
                 // Don't reset navigation here - let user continue with existing selection
             } catch (error) {
