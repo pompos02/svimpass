@@ -682,7 +682,7 @@ export default function MainScreen({ onLogout }: MainScreenProps) {
                         autoCorrect="off"
                         autoCapitalize="off"
                         spellCheck="false"
-                        disabled={isLoading}
+                        disabled={isLoading && passwordEntryState.isActive}
                     />
                     {passwordEntryState.isActive && (
                         <button
