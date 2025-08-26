@@ -1,20 +1,28 @@
 # svimpass
 
-A minimal, spotlight-like local password manager with built-in command system and encrypted storage.
+> A minimal, hotkey-driven, spotlight-like password manager designed for speed, security, and simplicity.
 
-## Overview
+## ✨ Overview
 
-svimpass is a cross-platform desktop password manager that provides a clean, spotlight-like interface for quick password access and management. It features AES-256-GCM encryption, global hotkey support (Windows/macOS), and a powerful command system for advanced operations.
+**svimpass** is a cross-platform desktop password manager that provides a clean, spotlight-like interface for fast password access and management. It is fully local, secure by design, and optimized for keyboard-driven workflows.
 
 ### Key Features
 
-- **Encrypted Storage**: AES-256-GCM encryption with PBKDF2 key derivation
-- **Global Hotkeys**: Quick access via system-wide shortcuts
-- **CSV Import/Export**: Bulk password management with standard CSV format
-- **Command System**: Built-in commands for password operations
-- **Spotlight Interface**: Minimal, keyboard-driven design for efficiency
+- **Strong Security**
+  - AES-256-GCM encryption
+  - PBKDF2 key derivation with unique salts
+  - Fully local storage (no remote servers)
+- **Hotkey Driven Workflow**
+  - Global hotkey support (Windows/macOS)
+  - Search, edit, delete, and generate entries entirely from the keyboard
+- **Command System**
+  - Spotlight-like interface with powerful built-in commands
+- **CSV Import/Export**
+  - Manage passwords in bulk using standard CSV format
+- **Cross-Platform**
+  - Linux, Windows, macOS
 
-## Technology Stack
+## Tech Stack
 
 - **Backend**: Go 1.23, Wails v2, SQLite
 - **Frontend**: React 18, TypeScript, Vite
@@ -61,11 +69,11 @@ GCC (GNU Compiler Collection) is required for building Go applications with CGO 
 
 ## Installation
 
-### Build from Source
-
 ### Pre-built Binaries
 
 Download the latest release for your platform from the [releases page](https://github.com/pompos02/svimpass/releases).
+
+### Build from Source
 
 1. **Clone the repository**:
 
@@ -94,11 +102,16 @@ Download the latest release for your platform from the [releases page](https://g
    make build-linux
    ```
 
+   To be able to run the app you have to run the binary, and to toggle the floating window you should run the binary with the `--toggle` flag (this suits me as i am working on hyprland and could make the global hotkey to work due to wayland conflicts).
+   You can easily set a hotkey to run the binary with the flag
+
    #### Windows Build
 
    ```bash
    make build-windows
    ```
+
+   Recommended to just run the installer provided by the releases.
 
    #### macOS Build
 
@@ -106,7 +119,9 @@ Download the latest release for your platform from the [releases page](https://g
    make build-darwin
    ```
 
-Built binaries will be located in `build/bin/`.
+   Drag the `.app` you just created in your applications folder so Spotlight/Raycast recognise it
+
+Built binaries will be located in `build/bin/` or specifies otherwise by the build script.
 
 ## Platform-Specific Notes
 
@@ -142,27 +157,35 @@ Built binaries will be located in `build/bin/`.
 - Press Enter to copy password to clipboard
 - Press Escape to hide window
 
+Whenver you create or manipulate a specific entry, the application toggles off and the generated/edited password is always saved in your clipboard.
+
 #### Command Mode
 
 All commands start with `:` (colon):
 
-- **`:add service;username;notes`** - Add password entry (password prompted) (automatically saved to your clipboard)
-- **`:addgen service;username;notes`** - Generate and save secure password (automatically saved to your clipboard)
-- **`:import /path/to/file.csv`** - Import passwords from CSV file (full path required)
-- **`:export`** - Export all passwords to CSV (saved to ~/Downloads/svimapassPasswords.csv)
-- **`:reset!`** - Complete application reset (WARNING: Deletes all data)
+| Command                          | Description                                               |
+| -------------------------------- | --------------------------------------------------------- |
+| `:add service;username;notes`    | Add entry (password prompted, copied to clipboard)        |
+| `:addgen service;username;notes` | Generate + save strong password (copied to clipboard)     |
+| `:import /path/to/file.csv`      | Import entries from CSV                                   |
+| `:export`                        | Export all entries to `~/Downloads/svimpassPasswords.csv` |
+| `:reset!`                        | Full reset (⚠ deletes all data and files produced)       |
 
-#### Keyboard Shortcuts
+## Keyboard Shortcuts
 
-- **Ctrl+L** - Lock application (return to login screen)
-- **Ctrl+D** - Delete selected password entry
-- **Ctrl+E** - Edit selected entry's password
-- **Escape** - Hide application window
-- **Arrow Keys** - Navigate through search results
+Because the floating window is the only interface available, we manipulate the application and entries with the keyboard.
 
-### CSV Import/Export Format
+| Shortcut       | Action                             |
+| -------------- | ---------------------------------- |
+| **Ctrl+L**     | Lock application (return to login) |
+| **Ctrl+D**     | Delete selected entry              |
+| **Ctrl+E**     | Edit selected entry’s password     |
+| **Escape**     | Hide application window            |
+| **Arrow Keys** | Navigate results                   |
 
-The application uses a standard CSV format with the following columns:
+### CSV Import/Export Examples
+
+**Format:**
 
 ```csv
 ServiceName,Username,Password,Notes
@@ -170,20 +193,39 @@ Gmail,user@example.com,mypassword123,Work email
 GitHub,johndoe,gh_token_xyz,Development account
 ```
 
-**Format Requirements:**
+**Commands:**
 
-- **Header row required**: `ServiceName,Username,Password,Notes`
-- **Minimum fields**: ServiceName, Username, Password (Notes optional)
-- **Empty fields**: Entries with empty required fields are skipped during import
-- **Export location**: `~/Downloads/svimapassPasswords.csv`
+- **Import**: `:import /absolute/path/to/passwords.csv`
+- **Export**: `:export` (saves to `~/Downloads/svimapassPasswords.csv`)
 
-### Security Design
+**Requirements:**
 
-- **Encryption**: AES-256-GCM with authenticated encryption
-- **Key Derivation**: PBKDF2 with salt for master password
-- **File Permissions**: 0700 (user-only access) on all sensitive files
-- **Memory Safety**: Minimal plaintext exposure in memory
-- **Database**: SQLite with encrypted password storage only
+- Header row required: `ServiceName,Username,Password,Notes`
+- ServiceName, Username, Password cannot be empty
+- Use absolute file paths for import
+- UTF-8 encoding recommended
+
+## Application Files
+
+svimpass creates these files on your system:
+
+### Data Files
+
+- **`~/.local/share/svimpass/passwords.db`** - SQLite database storing encrypted passwords
+- **`~/.config/svimpass/config.json`** - Encrypted Master password configuration
+
+### Runtime Files
+
+- **`$XDG_RUNTIME_DIR/svimpass/app.sock`** - Unix socket for single-instance management (This enables the --toggle flag)
+- **`~/Downloads/svimapassPasswords.csv`** - CSV export file (created when using `:export` command)
+
+### Directories
+
+- **`~/.local/share/svimpass/`** - Main data directory (permissions: 700)
+- **`~/.config/svimpass/`** - Configuration directory (permissions: 700)
+- **`~/.local/share/svimpass/backups/`** - Backup directory (permissions: 700, empty by default)
+
+**Note:** All directories use restrictive permissions (700) for security - only the user can read/write/execute. If you unistall the application these files are not automatically deleted!
 
 ## Troubleshooting
 

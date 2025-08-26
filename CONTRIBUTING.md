@@ -44,61 +44,6 @@ svimpass uses the **Wails v2 framework** which combines:
 
 ```
 
-Frontend → App (app.go) → Services → Database
-↓
-Commands → Parser → Execution
-
-```
-
-### Backend Architecture
-
-```
-
-internal/
-├── commands/ # Command parser and execution system
-│ ├── commands.go # Command implementations (Add, Import, Export, Reset)
-│ ├── interface.go # Command interface definition
-│ └── parser.go # Command parsing logic
-├── crypto/ # Encryption and master password management
-│ ├── encryption.go # AES-256-GCM encryption/decryption
-│ └── master.go # PBKDF2 key derivation, master password handling
-├── database/ # SQLite ORM and models
-│ ├── db.go # Database connection, CRUD operations
-│ └── models.go # PasswordEntry struct, request types
-├── hotkey/ # Platform-specific global shortcuts
-│ ├── interface.go # Common hotkey interface
-│ ├── manager_linux.go # Linux implementation (no-op)
-│ ├── manager_windows.go # Windows hotkey implementation
-│ └── manager_darwin.go # macOS hotkey implementation
-├── paths/ # XDG-compliant file organization
-│ └── paths.go # Config, data, cache directory management
-├── services/ # Business logic layer
-│ ├── auth.go # Authentication service (login/unlock)
-│ ├── password.go # Password service (CRUD, generation)
-│ └── types.go # Service request/response types
-├── csv/ # Import/export functionality
-│ ├── exporter.go # CSV export logic
-│ └── importer.go # CSV import with validation
-└── generator/ # Secure password generation
-└── generator.go # Cryptographically secure random passwords
-
-```
-
-### Frontend Architecture
-
-```
-
-frontend/src/
-├── components/
-│ ├── LoginScreen.tsx # Master password entry
-│ ├── MainScreen.tsx # Main application interface
-│ └── PasswordDropdown.tsx # Search results display
-├── hooks/
-│ └── useSimpleNavigation.ts # Keyboard navigation logic
-├── assets/ # Static resources (fonts, images)
-├── types.ts # TypeScript type definitions
-└── main.tsx # Application entry point
-
 ### Security Architecture
 
 #### Encryption Layer
@@ -170,12 +115,7 @@ The `wails.json` file defines build and development settings:
 
 ## Development Workflow
 
-### 1. Fork and Clone
-
-```bash
-git clone https://github.com/your-username/svimpass
-cd svimpass
-```
+### 1. Fork
 
 ### 2. Create Feature Branch
 
@@ -199,8 +139,11 @@ make ....
 ### 4. Make Changes
 
 - Follow the coding standards above
-- Add tests for new functionality
 - Update documentation if needed
+
+### 5. Test
+
+To test your changes build the application and run the binary in the terminal, in another terminal window, run the binary with the `--toggle` flag
 
 ## API Reference
 
@@ -281,8 +224,6 @@ CREATE TABLE password_entries (
 CREATE INDEX idx_service_name ON password_entries(service_name);
 CREATE INDEX idx_username ON password_entries(username);
 ```
-
-## Testing Guidelines
 
 ### Build Issues
 
