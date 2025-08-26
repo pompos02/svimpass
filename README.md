@@ -6,7 +6,7 @@
 
 **svimpass** is a cross-platform desktop password manager that provides a clean, spotlight-like interface for fast password access and management. It is fully local, secure by design, and optimized for keyboard-driven workflows.
 
-![Svimpass demo][media/svimappAddgen.gif]
+![Svimpass demo](media/svimappAddgen.gif)
 
 ### Key Features
 
