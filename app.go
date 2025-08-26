@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
-	"io/ioutil"
 
 	"svimpass/internal/commands"
 	"svimpass/internal/crypto"
@@ -15,6 +15,9 @@ import (
 	"github.com/energye/systray"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
+
+//go:embed frontend/src/assets/images/logo-universal.png
+var iconData []byte
 
 // App struct
 type App struct {
@@ -66,7 +69,6 @@ func (a *App) startup(ctx context.Context) {
 
 	// Initialize system tray
 	go a.initTray()
-
 }
 
 func (a *App) OnShutdown(ctx context.Context) {
@@ -99,14 +101,8 @@ func (a *App) tryInitTray() {
 		}()
 
 		systray.Run(func() {
-			// Load icon from assets
-			iconData, err := ioutil.ReadFile("frontend/src/assets/images/logo-universal.png")
-			if err != nil {
-				// Use default icon as fallback
-				systray.SetIcon([]byte{})
-			} else {
-				systray.SetIcon(iconData)
-			}
+			// Use embedded icon data
+			systray.SetIcon(iconData)
 
 			systray.SetTitle("Svimpass")
 			systray.SetTooltip("Svimpass Password Manager")
