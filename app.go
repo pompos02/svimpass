@@ -11,10 +11,9 @@ import (
 	"svimpass/internal/hotkey"
 	"svimpass/internal/paths"
 	"svimpass/internal/services"
-
-	energySystray "github.com/energye/systray"
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 	"svimpass/internal/systray"
+
+	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 //go:embed frontend/src/assets/images/logo-universal.png
@@ -72,13 +71,19 @@ func (a *App) startup(ctx context.Context) {
 	go systray.InitTray(iconData, systray.TrayCallbacks{
 		ShowWindow: a.ShowSpotlight,
 		HideWindow: a.HideSpotlight,
-		QuitApp:    func() { wailsruntime.Quit(a.ctx) },
+		QuitApp:    a.QuitApp,
 	})
 }
 
+// QuitApp handles application quit with proper cleanup
+func (a *App) QuitApp() {
+	if a.ctx != nil {
+		wailsruntime.Quit(a.ctx)
+	}
+}
+
 func (a *App) OnShutdown(ctx context.Context) {
-	// Stop system tray
-	energySystray.Quit()
+	// System tray cleanup is handled internally by the systray package
 
 	// Stop hotkey manager
 	if a.hotkeyManager != nil {

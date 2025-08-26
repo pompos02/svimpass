@@ -31,6 +31,8 @@ export function LockApp():Promise<void>;
 
 export function OnShutdown(arg1:context.Context):Promise<void>;
 
+export function QuitApp():Promise<void>;
+
 export function ResizeWindow(arg1:number,arg2:number):Promise<void>;
 
 export function SearchPasswords(arg1:string):Promise<Array<services.PasswordEntryResponse>>;

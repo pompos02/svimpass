@@ -39,8 +39,8 @@ func InitTray(iconData []byte, callbacks TrayCallbacks) {
 			callbacks.HideWindow()
 		})
 		mQuit.Click(func() {
-			systray.Quit()
 			callbacks.QuitApp()
+			systray.Quit()
 		})
 	}, func() {
 		// Cleanup function - called when systray stops

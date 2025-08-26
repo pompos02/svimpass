@@ -58,6 +58,10 @@ export function OnShutdown(arg1) {
   return window['go']['main']['App']['OnShutdown'](arg1);
 }
 
+export function QuitApp() {
+  return window['go']['main']['App']['QuitApp']();
+}
+
 export function ResizeWindow(arg1, arg2) {
   return window['go']['main']['App']['ResizeWindow'](arg1, arg2);
 }
