@@ -38,7 +38,7 @@ func ParseCommand(input string, passwordSvc *services.PasswordService, paths *pa
 	case "export":
 		return parseExportCommand(passwordSvc)
 	case "reset!":
-		return ParseResetCommand(paths)
+		return ParseResetCommand(paths, passwordSvc)
 
 	default:
 		return nil, fmt.Errorf("unknown command: %s", command)
@@ -125,6 +125,9 @@ func parseExportCommand(passwordSvc *services.PasswordService) (Command, error) 
 	return &ExportCommand{PasswordService: passwordSvc}, nil
 }
 
-func ParseResetCommand(paths *paths.Paths) (Command, error) {
-	return &ResetApp{Paths: paths}, nil
+func ParseResetCommand(paths *paths.Paths, passwordSvc *services.PasswordService) (Command, error) {
+	return &ResetApp{
+		Paths:       paths,
+		PasswordSvc: passwordSvc,
+	}, nil
 }

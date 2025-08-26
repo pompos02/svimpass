@@ -12,8 +12,8 @@ import (
 	"svimpass/internal/paths"
 	"svimpass/internal/services"
 
-	"github.com/energye/systray"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"svimpass/internal/systray"
 )
 
 //go:embed frontend/src/assets/images/logo-universal.png
@@ -68,7 +68,11 @@ func (a *App) startup(ctx context.Context) {
 	}
 
 	// Initialize system tray
-	go a.initTray()
+	go systray.InitTray(iconData, systray.TrayCallbacks{
+		ShowWindow: a.ShowSpotlight,
+		HideWindow: a.HideSpotlight,
+		QuitApp:    func() { wailsruntime.Quit(a.ctx) },
+	})
 }
 
 func (a *App) OnShutdown(ctx context.Context) {
@@ -81,53 +85,6 @@ func (a *App) OnShutdown(ctx context.Context) {
 	if a.db != nil {
 		a.db.Close()
 	}
-}
-
-// initTray initializes the system tray icon and menu with automatic fallback
-func (a *App) initTray() {
-	// Try to initialize system tray in a goroutine with automatic fallback
-	go a.tryInitTray()
-}
-
-// tryInitTray attempts to initialize the system tray with automatic fallback
-func (a *App) tryInitTray() {
-	// Try to run systray - if it fails, the application continues without it
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				// Silently continue without system tray
-				fmt.Println("System tray not available, continuing without it")
-			}
-		}()
-
-		systray.Run(func() {
-			// Use embedded icon data
-			systray.SetIcon(iconData)
-
-			systray.SetTitle("Svimpass")
-			systray.SetTooltip("Svimpass Password Manager")
-
-			// Create menu items
-			mShow := systray.AddMenuItem("Show", "Show password manager")
-			mHide := systray.AddMenuItem("Hide", "Hide password manager")
-			systray.AddSeparator()
-			mQuit := systray.AddMenuItem("Quit", "Quit application")
-
-			// Register click handlers
-			mShow.Click(func() {
-				a.ShowSpotlight()
-			})
-			mHide.Click(func() {
-				a.HideSpotlight()
-			})
-			mQuit.Click(func() {
-				systray.Quit()
-				wailsruntime.Quit(a.ctx)
-			})
-		}, func() {
-			// Cleanup function - called when systray stops
-		})
-	}()
 }
 
 // onBeforeClose is called before the window closes

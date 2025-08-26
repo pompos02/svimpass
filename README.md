@@ -116,7 +116,7 @@ Built binaries will be located in `build/bin/`.
 
 ### Windows
 
-- **Global hotkey**: `Ctrl+Alt+Space`
+- **Global hotkey**: `Ctrl+Shift+P`
 
 ### macOS
 

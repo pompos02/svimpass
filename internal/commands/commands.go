@@ -63,11 +63,16 @@ func (c *ExportCommand) Execute(ctx context.Context) (any, error) {
 }
 
 type ResetApp struct {
-	Paths *paths.Paths
+	Paths       *paths.Paths
+	PasswordSvc *services.PasswordService
 }
 
 func (c *ResetApp) Execute(ctx context.Context) (any, error) {
-	err := c.Paths.ResetAll()
+	err := c.PasswordSvc.ResetApp()
+	if err != nil {
+		fmt.Errorf("error reseting %w", err)
+	}
+	err = c.Paths.ResetAll()
 	if err != nil {
 		return nil, fmt.Errorf("error cleaning the files with error %w", err)
 	}

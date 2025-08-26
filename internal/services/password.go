@@ -187,3 +187,11 @@ func (ps *PasswordService) ExportPasswordToCSV() error {
 
 	return csv.ExportPasswordToCSV(ps.db, ps.authSvc.encKey)
 }
+
+func (ps *PasswordService) ResetApp() error {
+	ps.authSvc.LockApp()
+	if ps.db != nil {
+		ps.db.Close()
+	}
+	return nil
+}
