@@ -12,6 +12,7 @@ import (
 	"svimpass/internal/paths"
 	"svimpass/internal/services"
 
+	energySystray "github.com/energye/systray"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 	"svimpass/internal/systray"
 )
@@ -76,6 +77,9 @@ func (a *App) startup(ctx context.Context) {
 }
 
 func (a *App) OnShutdown(ctx context.Context) {
+	// Stop system tray
+	energySystray.Quit()
+
 	// Stop hotkey manager
 	if a.hotkeyManager != nil {
 		a.hotkeyManager.Stop()

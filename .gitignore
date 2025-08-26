@@ -2,4 +2,5 @@ build/bin
 node_modules
 frontend/dist
 AGENTS.md
+.DS_Store
 
