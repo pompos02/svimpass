@@ -172,6 +172,7 @@ All commands start with `:` (colon):
 | `:import /path/to/file.csv`      | Import entries from CSV                                   |
 | `:export`                        | Export all entries to `~/Downloads/svimpassPasswords.csv` |
 | `:reset!`                        | Full reset (⚠ deletes all data and files produced)       |
+| `:help`                          | Shows a list of all available commands                    |
 
 ## Keyboard Shortcuts
 
